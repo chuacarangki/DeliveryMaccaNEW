@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesehan Macca | Luxury Rewards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --primary: #f59e0b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #10b981;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg); 
+            background-image: radial-gradient(circle at top right, #1e293b, #0b0f1a);
+            color: var(--text-main); margin: 0; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
+        }
+
+        .app-container { width: 100%; max-width: 480px; padding: 20px; animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Toast Notifikasi */
+        #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 85%; pointer-events: none; }
+        .toast {
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
+            padding: 16px 20px; border-radius: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), toastOut 0.5s 2.5s forwards;
+        }
+
+        /* Login Screen */
+        .hidden { display: none; }
+        .login-screen { text-align: center; padding-top: 60px; }
+        .role-card { 
+            background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
+            padding: 35px; border-radius: 30px; margin-bottom: 20px; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .role-card:active { transform: scale(0.95); }
+
+        .num-btn { 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: white;
+            width: 70px; height: 70px; border-radius: 50%; font-size: 1.5rem; font-weight: 800; cursor: pointer;
+            transition: 0.2s;
+        }
+        .num-btn:active { background: var(--primary); color: var(--bg); transform: scale(0.85); }
+
+        /* Navigation Bar */
+        .nav-bar { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; background: rgba(255,255,255,0.03); 
+            padding: 6px; border-radius: 20px; margin-bottom: 30px; border: 1px solid var(--glass-border);
+        }
+        .nav-btn { 
+            padding: 14px; border: none; background: none; color: var(--text-dim); 
+            font-weight: 800; cursor: pointer; border-radius: 16px; font-size: 11px; transition: 0.4s;
+        }
+        .nav-btn.active { background: var(--primary); color: var(--bg); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); }
+
+        /* Order Cards */
+        .order-card { 
+            background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 28px; padding: 22px; 
+            margin-bottom: 18px; border: 1px solid var(--glass-border);
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+        .cust-name { font-size: 1.4rem; font-weight: 800; display: block; margin: 6px 0; color: var(--text-main); }
+        .status-tag { font-size: 9px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* WhatsApp Link Style */
+        .wa-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--accent-green); text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; margin-top: 5px;
+            padding: 5px 10px; background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px; transition: 0.3s;
+        }
+        .wa-link:active { background: rgba(16, 185, 129, 0.2); transform: scale(0.95); }
+
+        /* Ranking UI */
+        .rank-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;
+            border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both;
+        }
+        .rank-number { font-size: 28px; font-weight: 900; color: var(--primary); width: 50px; opacity: 0.4; }
+        .badge { font-size: 9px; padding: 4px 10px; border-radius: 8px; font-weight: 900; margin-top: 5px; display: inline-block; }
+        .gold { background: var(--primary); color: var(--bg); }
+        .silver { background: #cbd5e1; color: var(--bg); }
+        .bronze { background: #78350f; color: white; }
+
+        /* Buttons & Inputs */
+        .action-btn { 
+            width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 800; 
+            cursor: pointer; margin-top: 15px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .action-btn:active { transform: scale(0.96); }
+        .btn-disabled { background: rgba(255,255,255,0.05) !important; color: var(--text-dim) !important; cursor: not-allowed; }
+        
+        input { 
+            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); 
+            padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        @keyframes toastOut { to { transform: translate(-50%, -150%); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="app-container">
+    <div id="login-screen" class="login-screen">
+        <div style="margin-bottom:60px; animation: slideUp 0.8s ease;">
+            <h1 style="color:var(--primary); font-size: 2.8rem; margin:0; letter-spacing: -3px; font-weight: 900;">MACCA</h1>
+            <p style="color:var(--text-dim); font-weight: 700; font-size: 0.85rem; letter-spacing: 2px;">PREMIUM DELIVERY</p>
+        </div>
+        <div id="step-1">
+            <div class="role-card" onclick="showNumpad('admin')"><h3>ADMIN</h3><small>MANAJEMEN & DAPUR</small></div>
+            <div class="role-card" onclick="showNumpad('driver')"><h3>DRIVER</h3><small>LOGISTIK PENGANTARAN</small></div>
+        </div>
+        <div id="step-2" class="hidden">
+            <div class="numpad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; justify-items: center;">
+                <button class="num-btn" onclick="pressNum(1)">1</button>
+                <button class="num-btn" onclick="pressNum(2)">2</button>
+                <button class="num-btn" onclick="pressNum(3)">3</button>
+                <button class="num-btn" onclick="pressNum(8)">8</button>
+                <button class="num-btn" onclick="pressNum(9)">9</button>
+                <button class="num-btn" style="background:rgba(239, 68, 68, 0.15); color:#ef4444" onclick="location.reload()">🔙</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-ui" class="hidden">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <div style="background:rgba(255,255,255,0.05); padding:8px 20px; border-radius:50px; border:1px solid var(--primary); color:var(--primary); font-weight:800; font-size:0.8rem;" id="user-display">User</div>
+            <div onclick="logout()" style="color:var(--text-dim); cursor:pointer; font-size:11px; font-weight:800; letter-spacing:1px;">LOGOUT</div>
+        </header>
+
+        <nav class="nav-bar">
+            <button id="tab-order" class="nav-btn active" onclick="switchTab('order')">ORDERS</button>
+            <button id="tab-rank" class="nav-btn" onclick="switchTab('rank')">RANKING</button>
+            <button id="tab-rekap" class="nav-btn" onclick="switchTab('rekap')">HISTORY</button>
+        </nav>
+
+        <section id="order-section">
+            <div id="admin-only-form" class="hidden" style="margin-bottom: 30px; animation: slideUp 0.5s ease;">
+                <input type="text" id="cust-name" placeholder="Nama Pelanggan">
+                <input type="number" id="cust-wa" placeholder="Contoh: 6281234...">
+                <button class="action-btn" style="background:var(--primary); color:var(--bg)" onclick="createOrder()">KIRIM KE DAPUR</button>
+            </div>
+            <div id="list-orders"></div>
+        </section>
+
+        <section id="rank-section" class="hidden">
+            <div id="leaderboard"></div>
+        </section>
+
+        <section id="rekap-section" class="hidden">
+            <div id="history-list"></div>
+        </section>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWl_NXUXwt29rLArj79j8RlM8bY6kOCCg",
+        authDomain: "delivery-macca-new.firebaseapp.com",
+        projectId: "delivery-macca-new",
+        storageBucket: "delivery-macca-new.firebasestorage.app",
+        messagingSenderId: "544568459586",
+        appId: "1:544568459586:web:9e4db30e700941ce4948db"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const users = {
+        8: { name: 'MANDA', role: 'admin' }, 9: { name: 'NUNU', role: 'admin' },
+        1: { name: 'HASBI', role: 'driver' }, 2: { name: 'REZKY', role: 'driver' }, 3: { name: 'ASWAR', role: 'driver' }
+    };
+
+    window.showToast = (msg, icon = '✨') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<span>${icon}</span> <span style="font-weight:700; font-size:14px;">${msg}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    let selectedRoleType = '';
+    window.showNumpad = (role) => {
+        selectedRoleType = role;
+        document.getElementById('step-1').classList.add('hidden');
+        document.getElementById('step-2').classList.remove('hidden');
+    };
+
+    window.pressNum = (num) => {
+        const user = users[num];
+        if (user && user.role === selectedRoleType) {
+            localStorage.setItem('macca_user', JSON.stringify(user));
+            location.reload();
+        } else { showToast("Kode tidak sesuai role!", "⚠️"); }
+    };
+
+    window.logout = () => { localStorage.clear(); location.reload(); };
+
+    const currentUser = JSON.parse(localStorage.getItem('macca_user'));
+    if (currentUser) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-ui').classList.remove('hidden');
+        document.getElementById('user-display').innerText = currentUser.name;
+        if (currentUser.role === 'admin') document.getElementById('admin-only-form').classList.remove('hidden');
+        initApp();
+    }
+
+    function initApp() {
+        onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
+            const list = document.getElementById('list-orders');
+            list.innerHTML = snap.empty ? `<p style="text-align:center; color:var(--text-dim); margin-top:50px;">Tidak ada antrian.</p>` : "";
+            
+            snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach((d, idx) => {
+                const item = d.data();
+                let action = "";
+                
+                // Format nomor WA untuk link
+                const cleanWA = item.wa.replace(/\D/g, ''); 
+                const waLink = `https://wa.me/${cleanWA}`;
+
+                if (currentUser.role === 'admin') {
+                    if (item.status === 'DAPUR') action = `<button class="action-btn" style="background:var(--accent-blue); color:var(--bg)" onclick="updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>`;
+                    else if (item.status === 'SIAP') action = `<div style="color:var(--accent-blue); font-size:11px; margin-top:15px; text-align:center; font-weight:800;">📡 MENUNGGU DRIVER...</div>`;
+                    else action = `<div style="color:var(--accent-green); font-size:11px; margin-top:15px; font-weight:800;">🛵 DIANTAR: ${item.driver}</div>`;
+                } else {
+                    if (item.status === 'DAPUR') {
+                        action = `<button class="action-btn btn-disabled" disabled>SEDANG DIPROSES DAPUR</button>`;
+                    } else if (item.status === 'SIAP') {
+                        action = `<button class="action-btn" style="background:var(--accent-green); color:var(--bg)" onclick="takeOrder('${d.id}')">AMBIL PESANAN</button>`;
+                    } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
+                        action = `<button class="action-btn" style="background:var(--primary); color:var(--bg)" onclick="finishOrder('${d.id}')">SELESAI & AMBIL POIN</button>`;
+                    } else { return; }
+                }
+
+                list.innerHTML += `
+                    <div class="order-card" style="animation-delay: ${idx * 0.1}s">
+                        <span class="status-tag">${item.status}</span>
+                        <span class="cust-name">${item.customer}</span>
+                        <a href="${waLink}" target="_blank" class="wa-link">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.17-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                            </svg>
+                            Hubungi Pelanggan
+                        </a>
+                        ${action}
+                    </div>`;
+            });
+        });
+
+        // RANKING & HISTORY SCRIPT TETAP SAMA
+        onSnapshot(collection(db, "driver_stats"), (snap) => {
+            const drivers = [];
+            snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
+            drivers.sort((a,b) => b.points - a.points);
+            const lb = document.getElementById('leaderboard');
+            lb.innerHTML = "";
+            drivers.forEach((drv, idx) => {
+                const bg = ['gold', 'silver', 'bronze'];
+                lb.innerHTML += `<div class="rank-card" style="animation-delay: ${idx * 0.1}s">
+                    <div class="rank-number">${idx+1}</div>
+                    <div style="flex:1">
+                        <div style="font-weight:800; font-size:17px;">${drv.id}</div>
+                        <span class="badge ${bg[idx] || ''}">${bg[idx] || 'ELITE DRIVER'}</span>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="color:var(--primary); font-weight:900; font-size:1.4rem;">${drv.points}</div>
+                        <small style="font-size:9px; font-weight:800; color:var(--text-dim)">Poin</small>
+                    </div>
+                </div>`;
+            });
+        });
+
+        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI")), (snap) => {
+            const hl = document.getElementById('history-list');
+            hl.innerHTML = "";
+            snap.docs.sort((a,b) => b.data().finishedAt?.seconds - a.data().finishedAt?.seconds).slice(0, 10).forEach(d => {
+                const item = d.data();
+                hl.innerHTML += `<div class="order-card" style="border:none; background:rgba(255,255,255,0.02); opacity:0.6">
+                    <small style="font-size:9px; font-weight:800; color:var(--text-dim)">${item.driver.toUpperCase()} COMPLETED</small>
+                    <div style="font-weight:700;">${item.customer}</div>
+                </div>`;
+            });
+        });
+    }
+
+    window.createOrder = async () => {
+        const n = document.getElementById('cust-name').value;
+        const w = document.getElementById('cust-wa').value;
+        if(n && w) {
+            await addDoc(collection(db, "orders"), { customer: n, wa: w, status: "DAPUR", createdAt: serverTimestamp() });
+            showToast("Order Masuk Dapur!", "🍳");
+            document.getElementById('cust-name').value = ""; document.getElementById('cust-wa').value = "";
+        }
+    };
+
+    window.updateStatus = async (id, status) => {
+        await updateDoc(doc(db, "orders", id), { status: status });
+        showToast("Siap di-pickup!", "🚀");
+    };
+
+    window.takeOrder = async (id) => {
+        await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name });
+        showToast("Hati-hati di jalan!", "🛵");
+    };
+
+    window.finishOrder = async (id) => {
+        await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
+        const dr = doc(db, "driver_stats", currentUser.name);
+        const ds = await getDoc(dr);
+        if (ds.exists()) await updateDoc(dr, { points: ds.data().points + 200 });
+        else await setDoc(dr, { points: 200 });
+        showToast("+200 Poin Berhasil!", "💰");
+    };
+
+    window.switchTab = (t) => {
+        document.getElementById('order-section').classList.toggle('hidden', t!=='order');
+        document.getElementById('rank-section').classList.toggle('hidden', t!=='rank');
+        document.getElementById('rekap-section').classList.toggle('hidden', t!=='rekap');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + t).classList.add('active');
+    };
+</script>
+</body>
+</html>
