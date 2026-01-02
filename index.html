@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lesehan Macca | Premium System</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -19,12 +19,13 @@
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
-        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; transform: translateZ(0); }
         
         body { 
             background: var(--bg); 
             background-image: radial-gradient(circle at top right, #1e293b, #0b0f1a);
             color: var(--text-main); margin: 0; display: flex; justify-content: center; min-height: 100vh;
+            overscroll-behavior-y: contain;
         }
 
         .app-container { width: 100%; max-width: 420px; padding: 20px; }
@@ -43,23 +44,22 @@
         }
 
         @keyframes superPulse {
-            0% { transform: scale(1); opacity: 0.9; }
+            0%, 100% { transform: scale(1); opacity: 0.9; }
             50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.9; }
-        }
-
-        .wa-float {
-            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
-            background: var(--accent-green); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); text-decoration: none; z-index: 10;
         }
 
         #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 85%; pointer-events: none; }
         .toast {
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
-            padding: 16px 20px; border-radius: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--primary);
+            padding: 18px 22px; border-radius: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px;
             animation: toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        .toast-icon { font-size: 1.5rem; }
+        .toast-msg { font-size: 0.9rem; font-weight: 700; color: #fff; line-height: 1.4; }
+
+        .waiting-icon { display: inline-block; animation: rotateWait 2s linear infinite; margin-right: 5px; }
+        @keyframes rotateWait { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .hidden { display: none !important; }
         .login-screen { text-align: center; padding-top: 40px; }
@@ -96,17 +96,24 @@
             background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; 
             margin-bottom: 16px; border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both; position: relative;
         }
-        .cust-name { font-size: 1.2rem; font-weight: 800; display: block; margin-top: 4px; color: var(--text-main); }
-        .cust-address { font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); display: block; margin-top: 4px; }
+        .cust-name { font-size: 1.2rem; font-weight: 800; display: block; margin-top: 4px; color: var(--text-main); width: 75%; }
+        .cust-address { font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); display: block; margin-top: 4px; width: 80%; line-height: 1.3; }
         .status-tag { font-size: 9px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
-        .action-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; margin-top: 15px; }
-        .danger-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; margin-top: 20px; font-size: 10px; }
-        
+        .wa-float {
+            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
+            background: var(--accent-green); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); text-decoration: none;
+        }
+
+        .action-group { display: flex; gap: 8px; margin-top: 15px; }
+        .action-btn { flex: 2; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .danger-btn-small { flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; font-size: 10px; }
+
         .history-date-sep { font-size: 11px; font-weight: 800; color: var(--primary); margin: 25px 0 15px 10px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         .history-date-sep::after { content: ""; flex: 1; height: 1px; background: rgba(245, 158, 11, 0.2); }
 
-        input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; }
+        input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
@@ -169,7 +176,7 @@
                 <input type="text" id="cust-name" placeholder="Nama Pelanggan">
                 <input type="text" id="cust-address" placeholder="Alamat Pengiriman">
                 <input type="text" id="cust-wa" placeholder="WhatsApp (Contoh: 0812...)">
-                <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleCreateOrder()">KIRIM KE DAPUR</button>
+                <button class="action-btn" style="background:var(--primary); color:#000; width: 100%;" onclick="handleCreateOrder()">KIRIM KE DAPUR</button>
             </div>
             <div id="list-orders"></div>
         </section>
@@ -181,7 +188,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAWl_NXUXwt29rLArj79j8RlM8bY6kOCCg",
@@ -208,13 +215,25 @@
     let selectedRoleType = '';
     let currentPinInput = '';
 
+    window.showToast = (msg, icon = '✨') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<div class="toast-icon">${icon}</div><div class="toast-msg">${msg}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translate(-50%, -20px)';
+            toast.style.transition = '0.5s';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    };
+
     window.handleRoleSelection = (role) => { 
-        selectedRoleType = role; 
-        currentPinInput = '';
+        selectedRoleType = role; currentPinInput = '';
         document.getElementById('step-1').classList.add('hidden'); 
         document.getElementById('step-2').classList.remove('hidden'); 
         document.getElementById('role-title').innerText = "PIN " + role;
-        document.getElementById('pin-view').innerText = '';
     };
 
     window.handleResetLogin = () => { 
@@ -241,21 +260,12 @@
             localStorage.setItem('just_logged_in', 'true');
             location.reload();
         } else {
-            window.showToast("PIN atau Role Salah!", "⚠️");
+            window.showToast("Duh, PIN-nya salah tuh!", "❌");
             window.handleClearPin();
         }
     };
 
     window.handleLogout = () => { localStorage.clear(); location.reload(); };
-    window.showToast = (msg, icon = '✨') => {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `<span>${icon}</span> <span style="font-weight:700;">${msg}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    };
-
     window.handleSwitchTab = (t) => {
         document.getElementById('order-section').classList.toggle('hidden', t!=='order');
         document.getElementById('rank-section').classList.toggle('hidden', t!=='rank');
@@ -286,7 +296,6 @@
             }, 3000);
         }
 
-        // --- REALTIME DATA FETCHING ---
         onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
             const list = document.getElementById('list-orders');
             if (snap.empty) {
@@ -295,74 +304,108 @@
             list.innerHTML = "";
             snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
                 const item = d.data();
-                const cleanWA = item.wa.replace(/\D/g, '').replace(/^0/, '62');
+                const cleanWA = item.wa ? item.wa.replace(/\D/g, '').replace(/^0/, '62') : '';
                 let action = "";
+                
                 if (currentUser.role === 'admin') {
                     if (item.status === 'DAPUR') {
-                        action = `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
-                                  <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">BATALKAN & HAPUS ORDER</button>`;
+                        action = `<div class="action-group">
+                                    <button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
+                                    <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS</button>
+                                  </div>`;
                     } else if (item.status === 'SIAP') {
-                        action = `<div style="color:var(--accent-blue);text-align:center;margin:15px 0;font-weight:800;font-size:11px">MENUNGGU DRIVER...</div>
-                                  <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS ORDERAN</button>`;
+                        action = `<div class="action-group" style="align-items:center; background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 12px; margin-top: 15px;">
+                                    <div style="flex:2; color:var(--accent-blue); text-align:center; font-weight:800; font-size:10px; letter-spacing:1px;">
+                                        <span class="waiting-icon">⏳</span>TUNGGU DRIVERNYA SIS...
+                                    </div>
+                                    <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS</button>
+                                  </div>`;
                     } else {
-                        action = `<div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>`;
+                        action = `<div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} LAGI OTW SIS!</div>`;
                     }
                 } else {
                     if (item.status === 'SIAP') {
-                        action = `<button class="action-btn" style="background:#10b981;color:#000" onclick="window.takeOrder('${d.id}')">AMBIL PESANAN</button>`;
+                        action = `<button class="action-btn" style="background:#10b981;color:#000;width:100%;margin-top:15px;" onclick="window.takeOrder('${d.id}')">SIAP! SAYA JEMPUT</button>`;
                     } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
-                        action = `<button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SELESAI</button>
-                                  <button class="danger-btn" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL AMBIL (KEMBALIKAN)</button>`;
+                        action = `<div class="action-group">
+                                    <button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SAMPAI TUJUAN!</button>
+                                    <button class="danger-btn-small" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL</button>
+                                  </div>`;
                     } else if (item.status === 'DIANTAR') {
-                        action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>`;
+                        action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} LAGI BERJUANG</div>`;
                     } else {
-                        action = `<button class="action-btn" style="background:rgba(255,255,255,0.05);color:var(--text-dim)" disabled>PROSES DAPUR</button>`;
+                        action = `<div style="text-align:center; color:var(--text-dim); font-size:10px; font-weight:800; margin-top:15px; background:rgba(255,255,255,0.05); padding: 10px; border-radius:10px;">
+                                    <span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK EMAK-EMAK...
+                                  </div>`;
                     }
                 }
+
                 list.innerHTML += `<div class="order-card">
                     <span class="status-tag">${item.status}</span>
-                    <span style="font-size:9px; color:var(--text-dim); display:block; margin-bottom:5px;">By: ${item.adminOnDuty}</span>
                     <span class="cust-name">${item.customer}</span>
                     <span class="cust-address">📍 ${item.address}</span>
                     <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg>
-                    </a>${action}</div>`;
+                    </a>
+                    <div style="font-size: 8px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin-top:10px;">Dibuat: ${item.adminOnDuty}</div>
+                    ${action}
+                </div>`;
             });
         });
 
         onSnapshot(collection(db, "driver_stats"), (snap) => {
             const lb = document.getElementById('leaderboard'); lb.innerHTML = "";
             const drivers = []; snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
-            drivers.sort((a,b) => b.points - a.points).forEach((drv, idx) => {
+            drivers.sort((a,b) => (b.points || 0) - (a.points || 0)).forEach((drv, idx) => {
                 lb.innerHTML += `<div class="order-card" style="display:flex;align-items:center;padding:15px">
                     <div style="font-size:20px;font-weight:900;color:var(--primary);width:35px;opacity:0.5">${idx+1}</div>
                     <div style="flex:1"><div style="font-weight:800;">${drv.id}</div>
-                        <div style="color:var(--accent-green);font-size:10px;font-weight:800;">🛵 ${drv.totalOrders || 0} ORDERS</div>
+                        <div style="color:var(--accent-green);font-size:14px;font-weight:900;letter-spacing:1px;margin-top:2px;">🛵 ${drv.totalOrders || 0} SELESAI</div>
                     </div>
-                    <div style="text-align:right"><div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points}</div>
-                        <div style="font-size:9px;color:var(--text-dim);font-weight:700">POINTS</div>
+                    <div style="text-align:right"><div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points || 0}</div>
+                        <div style="font-size:9px;color:var(--text-dim);font-weight:700">SALDO POIN</div>
                     </div></div>`;
             });
         });
 
-        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(20)), (snap) => {
+        const historyQuery = query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(40));
+        onSnapshot(historyQuery, (snap) => {
             const histList = document.getElementById('history-list');
-            if (snap.empty) { histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; return; }
-            const docs = snap.docs.sort((a, b) => (b.data().finishedAt?.seconds || 0) - (a.data().finishedAt?.seconds || 0));
+            if (snap.empty) { 
+                histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; 
+                return; 
+            }
+            const sortedDocs = snap.docs.sort((a, b) => {
+                const timeA = a.data().finishedAt?.seconds || a.data().createdAt?.seconds || 0;
+                const timeB = b.data().finishedAt?.seconds || b.data().createdAt?.seconds || 0;
+                return timeB - timeA;
+            });
             histList.innerHTML = ""; let lastDate = "";
-            docs.forEach(d => {
-                const item = d.data(); if (!item.finishedAt) return;
-                const dateObj = new Date(item.finishedAt.seconds * 1000);
+            sortedDocs.forEach(d => {
+                const item = d.data();
+                const ts = item.finishedAt || item.createdAt;
+                if (!ts) return;
+                const dateObj = new Date(ts.seconds * 1000);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 if (dateStr !== lastDate) { histList.innerHTML += `<div class="history-date-sep">${dateStr}</div>`; lastDate = dateStr; }
-                histList.innerHTML += `<div class="order-card" style="opacity:0.85; padding: 15px">
-                    <div style="display:flex;justify-content:space-between;">
-                        <div style="flex:1"><span class="status-tag" style="color:var(--text-dim)">SUCCESS</span><span class="cust-name" style="font-size:1rem">${item.customer}</span>
-                            <div style="font-size:0.8rem; color:var(--accent-blue); margin-top:2px;">📍 ${item.address}</div>
-                            <div style="color:var(--accent-green);font-weight:800;font-size:10px; margin-top:5px;">🛵 Driver: ${item.driver}</div>
+                histList.innerHTML += `<div class="order-card" style="opacity:0.9; padding: 18px; border-left: 4px solid var(--accent-green);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="flex:1">
+                            <span class="status-tag" style="color:var(--accent-green)">SUKSES TERKIRIM</span>
+                            <span class="cust-name" style="font-size:1.1rem; color: #fff;">${item.customer}</span>
+                            <div class="cust-address" style="margin-top: 6px; color: var(--accent-blue); font-size: 0.85rem;">📍 ${item.address}</div>
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 24px; height: 24px; background: rgba(37, 211, 102, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🛵</div>
+                                <div style="color:var(--text-main); font-weight:700; font-size:11px;">Kurir: ${item.driver || 'Driver'}</div>
+                            </div>
                         </div>
-                        <div style="text-align:right"><span style="color:var(--primary);font-weight:800;font-size:12px">${dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span></div>
-                    </div></div>`;
+                        <div style="text-align:right;">
+                            <span style="color:var(--primary); font-weight:800; font-size:12px; background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 8px;">
+                                ${dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                    </div>
+                </div>`;
             });
         });
 
@@ -371,22 +414,26 @@
             const a = document.getElementById('cust-address').value;
             const w = document.getElementById('cust-wa').value;
             if(n && a && w) {
-                await addDoc(collection(db, "orders"), { customer: n, address: a, wa: w, status: "DAPUR", adminOnDuty: currentUser.name, createdAt: serverTimestamp() });
-                window.showToast("Order Dikirim!", "🍳");
+                await addDoc(collection(db, "orders"), { 
+                    customer: n, address: a, wa: w, status: "DAPUR", 
+                    adminOnDuty: currentUser.name, createdAt: serverTimestamp() 
+                });
+                window.showToast("Lagi diproses Emak-Emak di Dapur..!", "👩‍🍳");
                 document.getElementById('cust-name').value = ""; document.getElementById('cust-address').value = ""; document.getElementById('cust-wa').value = "";
-            } else { window.showToast("Lengkapi data!", "⚠️"); }
+            } else { window.showToast("Data jangan dikosongin dong!", "😤"); }
         };
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, "orders", id), { status: status }); };
-        window.deleteOrder = async (id) => { if(confirm("Hapus Order?")) await deleteDoc(doc(db, "orders", id)); };
-        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); };
-        window.cancelTake = async (id) => { if(confirm("Batalkan ambil?")) await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); };
+        window.deleteOrder = async (id) => { if(confirm("Beneran mau dihapus? Kasihan pelanggannya..")) { await deleteDoc(doc(db, "orders", id)); window.showToast("Orderan resmi dibuang ke tong sampah!", "🗑️"); } };
+        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); window.showToast("Siap Meluncur! Hati-hati di jalan Bro!", "🛵"); };
+        window.cancelTake = async (id) => { if(confirm("Yah, gak jadi nganter nih?")) { await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); window.showToast("Gak jadi nganter, balik rebahan lagi..", "😴"); } };
         window.finishOrder = async (id) => {
             await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
             const dr = doc(db, "driver_stats", currentUser.name);
             const ds = await getDoc(dr);
             if (ds.exists()) { await updateDoc(dr, { points: increment(200), totalOrders: increment(1) }); } 
             else { await setDoc(dr, { points: 200, totalOrders: 1 }); }
+            window.showToast("Orderan Selesai! Cuan masuk kantong!", "💰");
         };
     }
 </script>
