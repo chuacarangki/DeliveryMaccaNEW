@@ -13,7 +13,9 @@
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --accent-blue: #38bdf8;
-            --accent-green: #10b981;
+            --accent-green: #25D366;
+            --accent-red: #ef4444;
+            --danger-dark: #450a0a;
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
@@ -22,12 +24,42 @@
         body { 
             background: var(--bg); 
             background-image: radial-gradient(circle at top right, #1e293b, #0b0f1a);
-            color: var(--text-main); margin: 0; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
+            color: var(--text-main); margin: 0; display: flex; justify-content: center; min-height: 100vh;
         }
 
-        .app-container { width: 100%; max-width: 480px; padding: 20px; animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .app-container { width: 100%; max-width: 420px; padding: 20px; }
 
-        /* Toast Notifikasi */
+        /* GREETING OVERLAY */
+        #greeting-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 15, 26, 0.95); backdrop-filter: blur(25px);
+            z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.8s ease; opacity: 1;
+        }
+        .greet-text {
+            font-size: 1.8rem; font-weight: 900; color: var(--primary); text-align: center;
+            padding: 0 30px; line-height: 1.4; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* WA PULSE ICON */
+        .wa-float {
+            position: absolute; top: 15px; right: 15px;
+            width: 45px; height: 45px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            animation: waPulse 2s infinite;
+            text-decoration: none;
+            z-index: 10;
+        }
+        @keyframes waPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        /* Toast */
         #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 85%; pointer-events: none; }
         .toast {
             background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
@@ -36,80 +68,51 @@
             animation: toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), toastOut 0.5s 2.5s forwards;
         }
 
-        /* Login Screen */
-        .hidden { display: none; }
-        .login-screen { text-align: center; padding-top: 60px; }
-        .role-card { 
-            background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
-            padding: 35px; border-radius: 30px; margin-bottom: 20px; cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .hidden { display: none !important; }
+        .login-screen { text-align: center; padding-top: 40px; }
+        .role-selector { display: flex; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        .btn-role {
+            flex: 1; padding: 20px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer;
+            transition: 0.3s; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 5px;
         }
-        .role-card:active { transform: scale(0.95); }
-
+        .btn-admin { background: var(--primary); color: #000; }
+        .btn-driver { background: #10b981; color: #000; }
+        
         .num-btn { 
-            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: white;
-            width: 70px; height: 70px; border-radius: 50%; font-size: 1.5rem; font-weight: 800; cursor: pointer;
-            transition: 0.2s;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white;
+            width: 65px; height: 65px; border-radius: 50%; font-size: 1.4rem; font-weight: 800; cursor: pointer;
         }
-        .num-btn:active { background: var(--primary); color: var(--bg); transform: scale(0.85); }
 
-        /* Navigation Bar */
         .nav-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; background: rgba(255,255,255,0.03); 
             padding: 6px; border-radius: 20px; margin-bottom: 30px; border: 1px solid var(--glass-border);
         }
-        .nav-btn { 
-            padding: 14px; border: none; background: none; color: var(--text-dim); 
-            font-weight: 800; cursor: pointer; border-radius: 16px; font-size: 11px; transition: 0.4s;
-        }
-        .nav-btn.active { background: var(--primary); color: var(--bg); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); }
+        .nav-btn { padding: 14px; border: none; background: none; color: var(--text-dim); font-weight: 800; font-size: 11px; cursor: pointer; }
+        .nav-btn.active { background: var(--primary); color: var(--bg); border-radius: 16px; }
 
-        /* Order Cards */
         .order-card { 
-            background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 28px; padding: 22px; 
-            margin-bottom: 18px; border: 1px solid var(--glass-border);
-            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+            background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; 
+            margin-bottom: 16px; border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both;
+            position: relative;
         }
-        .cust-name { font-size: 1.4rem; font-weight: 800; display: block; margin: 6px 0; color: var(--text-main); }
+        .cust-name { font-size: 1.2rem; font-weight: 800; display: block; margin-top: 4px; color: var(--text-main); max-width: 70%; }
+        .admin-badge { font-size: 9px; font-weight: 700; color: var(--accent-blue); opacity: 0.8; margin-bottom: 5px; display: block; }
         .status-tag { font-size: 9px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* WhatsApp Link Style */
-        .wa-link {
-            display: inline-flex; align-items: center; gap: 8px;
-            color: var(--accent-green); text-decoration: none;
-            font-size: 0.85rem; font-weight: 700; margin-top: 8px;
-            padding: 10px 16px; background: rgba(16, 185, 129, 0.1);
-            border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.2); transition: 0.3s;
-        }
-        .wa-link:active { background: rgba(16, 185, 129, 0.3); transform: scale(0.95); }
-
-        /* Ranking UI */
-        .rank-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-            border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;
-            border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both;
-        }
-        .rank-number { font-size: 28px; font-weight: 900; color: var(--primary); width: 50px; opacity: 0.4; }
-        .badge { font-size: 9px; padding: 4px 10px; border-radius: 8px; font-weight: 900; margin-top: 5px; display: inline-block; }
-        .gold { background: var(--primary); color: var(--bg); }
-        .silver { background: #cbd5e1; color: var(--bg); }
-        .bronze { background: #78350f; color: white; }
-
-        /* Buttons & Inputs */
-        .action-btn { 
-            width: 100%; padding: 18px; border-radius: 18px; border: none; font-weight: 800; 
-            cursor: pointer; margin-top: 15px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .action-btn:active { transform: scale(0.96); }
-        .btn-disabled { background: rgba(255,255,255,0.05) !important; color: var(--text-dim) !important; cursor: not-allowed; }
+        .action-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; margin-top: 15px; }
+        .danger-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; margin-top: 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;}
         
-        input { 
-            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); 
-            padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem;
+        .history-date-sep {
+            font-size: 11px; font-weight: 800; color: var(--primary); 
+            margin: 25px 0 15px 10px; display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
+        .history-date-sep::after { content: ""; flex: 1; height: 1px; background: rgba(245, 158, 11, 0.2); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem;}
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
         @keyframes toastOut { to { transform: translate(-50%, -150%); opacity: 0; } }
     </style>
@@ -117,63 +120,62 @@
 <body>
 
 <div id="toast-container"></div>
+<div id="greeting-overlay" class="hidden"><div id="greeting-content" class="greet-text"></div></div>
 
 <div class="app-container">
     <div id="login-screen" class="login-screen">
-        <div style="margin-bottom:60px; animation: slideUp 0.8s ease;">
-            <h1 style="color:var(--primary); font-size: 2.8rem; margin:0; letter-spacing: -3px; font-weight: 900;">MACCA</h1>
-            <p style="color:var(--text-dim); font-weight: 700; font-size: 0.85rem; letter-spacing: 2px;">PREMIUM DELIVERY</p>
+        <div style="margin-bottom:40px;">
+            <h1 style="color:var(--primary); font-size: 2.2rem; margin:0; letter-spacing: -2px; font-weight: 900;">MACCA</h1>
+            <p style="color:var(--text-dim); font-weight: 700; font-size: 0.75rem; letter-spacing: 2px;">PREMIUM DELIVERY</p>
         </div>
         <div id="step-1">
-            <div class="role-card" onclick="showNumpad('admin')"><h3>ADMIN</h3><small>MANAJEMEN & DAPUR</small></div>
-            <div class="role-card" onclick="showNumpad('driver')"><h3>DRIVER</h3><small>LOGISTIK PENGANTARAN</small></div>
+            <div class="role-selector">
+                <button class="btn-role btn-admin" onclick="handleRoleSelection('admin')"><span>ADMIN</span><small>DAPUR</small></button>
+                <button class="btn-role btn-driver" onclick="handleRoleSelection('driver')"><span>DRIVER</span><small>PENGANTARAN</small></button>
+            </div>
         </div>
         <div id="step-2" class="hidden">
-            <div class="numpad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; justify-items: center;">
-                <button class="num-btn" onclick="pressNum(1)">1</button>
-                <button class="num-btn" onclick="pressNum(2)">2</button>
-                <button class="num-btn" onclick="pressNum(3)">3</button>
-                <button class="num-btn" onclick="pressNum(8)">8</button>
-                <button class="num-btn" onclick="pressNum(9)">9</button>
-                <button class="num-btn" style="background:rgba(239, 68, 68, 0.15); color:#ef4444" onclick="location.reload()">🔙</button>
+            <p id="role-title" style="color:var(--primary); font-weight: 800; margin-bottom: 20px; text-transform: uppercase;"></p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; max-width: 260px; margin: 0 auto;">
+                <button class="num-btn" onclick="handlePressNum(1)">1</button>
+                <button class="num-btn" onclick="handlePressNum(2)">2</button>
+                <button class="num-btn" onclick="handlePressNum(3)">3</button>
+                <button class="num-btn" onclick="handlePressNum(8)">8</button>
+                <button class="num-btn" onclick="handlePressNum(9)">9</button>
+                <button class="num-btn" style="background:rgba(239, 68, 68, 0.15); color:#ef4444" onclick="handleResetLogin()">🔙</button>
             </div>
         </div>
     </div>
 
     <div id="main-ui" class="hidden">
-        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <div style="background:rgba(255,255,255,0.05); padding:8px 20px; border-radius:50px; border:1px solid var(--primary); color:var(--primary); font-weight:800; font-size:0.8rem;" id="user-display">User</div>
-            <div onclick="logout()" style="color:var(--text-dim); cursor:pointer; font-size:11px; font-weight:800; letter-spacing:1px;">LOGOUT</div>
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="background:rgba(255,255,255,0.05); padding:6px 16px; border-radius:50px; border:1px solid var(--primary); color:var(--primary); font-weight:800; font-size:0.75rem;" id="user-display">User</div>
+            <div onclick="handleLogout()" style="color:var(--text-dim); cursor:pointer; font-size:10px; font-weight:800;">LOGOUT</div>
         </header>
 
         <nav class="nav-bar">
-            <button id="tab-order" class="nav-btn active" onclick="switchTab('order')">ORDERS</button>
-            <button id="tab-rank" class="nav-btn" onclick="switchTab('rank')">RANKING</button>
-            <button id="tab-rekap" class="nav-btn" onclick="switchTab('rekap')">HISTORY</button>
+            <button id="tab-order" class="nav-btn active" onclick="handleSwitchTab('order')">ORDERS</button>
+            <button id="tab-rank" class="nav-btn" onclick="handleSwitchTab('rank')">RANKING</button>
+            <button id="tab-rekap" class="nav-btn" onclick="handleSwitchTab('rekap')">HISTORY</button>
         </nav>
 
         <section id="order-section">
-            <div id="admin-only-form" class="hidden" style="margin-bottom: 30px; animation: slideUp 0.5s ease;">
+            <div id="admin-only-form" class="hidden" style="margin-bottom: 25px;">
                 <input type="text" id="cust-name" placeholder="Nama Pelanggan">
-                <input type="text" id="cust-wa" placeholder="Nomor WhatsApp (Bebas Format)">
-                <button class="action-btn" style="background:var(--primary); color:var(--bg)" onclick="createOrder()">KIRIM KE DAPUR</button>
+                <input type="text" id="cust-wa" placeholder="WhatsApp (Contoh: 0812...)">
+                <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleCreateOrder()">KIRIM KE DAPUR</button>
             </div>
             <div id="list-orders"></div>
         </section>
 
-        <section id="rank-section" class="hidden">
-            <div id="leaderboard"></div>
-        </section>
-
-        <section id="rekap-section" class="hidden">
-            <div id="history-list"></div>
-        </section>
+        <section id="rank-section" class="hidden"><div id="leaderboard"></div></section>
+        <section id="rekap-section" class="hidden"><div id="history-list"></div></section>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAWl_NXUXwt29rLArj79j8RlM8bY6kOCCg",
@@ -187,168 +189,201 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const users = {
+    const USERS_DB = {
         8: { name: 'MANDA', role: 'admin' }, 9: { name: 'NUNU', role: 'admin' },
         1: { name: 'HASBI', role: 'driver' }, 2: { name: 'REZKY', role: 'driver' }, 3: { name: 'ASWAR', role: 'driver' }
     };
 
+    let selectedRoleType = '';
+    window.handleRoleSelection = (role) => { selectedRoleType = role; document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); document.getElementById('role-title').innerText = "PIN " + role; };
+    window.handleResetLogin = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
+    window.handlePressNum = (num) => {
+        const user = USERS_DB[num];
+        if (user && user.role === selectedRoleType) {
+            localStorage.setItem('macca_user', JSON.stringify(user));
+            localStorage.setItem('just_logged_in', 'true');
+            location.reload();
+        } else { window.showToast("PIN Salah!", "⚠️"); }
+    };
+    window.handleLogout = () => { localStorage.clear(); location.reload(); };
     window.showToast = (msg, icon = '✨') => {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
-        toast.innerHTML = `<span>${icon}</span> <span style="font-weight:700; font-size:14px;">${msg}</span>`;
+        toast.innerHTML = `<span>${icon}</span> <span style="font-weight:700;">${msg}</span>`;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     };
 
-    // LOGIKA MEMBERSIHKAN NOMOR WA (SMART CLEANER)
-    const formatWA = (num) => {
-        let clean = num.replace(/\D/g, ''); // Hapus semua selain angka
-        if (clean.startsWith('0')) {
-            clean = '62' + clean.slice(1); // Ubah 08... jadi 628...
-        }
-        return clean;
-    };
-
-    let selectedRoleType = '';
-    window.showNumpad = (role) => {
-        selectedRoleType = role;
-        document.getElementById('step-1').classList.add('hidden');
-        document.getElementById('step-2').classList.remove('hidden');
-    };
-
-    window.pressNum = (num) => {
-        const user = users[num];
-        if (user && user.role === selectedRoleType) {
-            localStorage.setItem('macca_user', JSON.stringify(user));
-            location.reload();
-        } else { showToast("Kode tidak sesuai role!", "⚠️"); }
-    };
-
-    window.logout = () => { localStorage.clear(); location.reload(); };
-
-    const currentUser = JSON.parse(localStorage.getItem('macca_user'));
-    if (currentUser) {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-ui').classList.remove('hidden');
-        document.getElementById('user-display').innerText = currentUser.name;
-        if (currentUser.role === 'admin') document.getElementById('admin-only-form').classList.remove('hidden');
-        initApp();
-    }
-
-    function initApp() {
-        onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
-            const list = document.getElementById('list-orders');
-            list.innerHTML = snap.empty ? `<p style="text-align:center; color:var(--text-dim); margin-top:50px;">Tidak ada antrian.</p>` : "";
-            
-            snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach((d, idx) => {
-                const item = d.data();
-                let action = "";
-                
-                // Gunakan Smart Format untuk Link WA
-                const cleanWA = formatWA(item.wa);
-                const waLink = `https://wa.me/${cleanWA}`;
-
-                if (currentUser.role === 'admin') {
-                    if (item.status === 'DAPUR') action = `<button class="action-btn" style="background:var(--accent-blue); color:var(--bg)" onclick="updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>`;
-                    else if (item.status === 'SIAP') action = `<div style="color:var(--accent-blue); font-size:11px; margin-top:15px; text-align:center; font-weight:800;">📡 MENUNGGU DRIVER...</div>`;
-                    else action = `<div style="color:var(--accent-green); font-size:11px; margin-top:15px; font-weight:800;">🛵 DIANTAR: ${item.driver}</div>`;
-                } else {
-                    if (item.status === 'DAPUR') {
-                        action = `<button class="action-btn btn-disabled" disabled>SEDANG DIPROSES DAPUR</button>`;
-                    } else if (item.status === 'SIAP') {
-                        action = `<button class="action-btn" style="background:var(--accent-green); color:var(--bg)" onclick="takeOrder('${d.id}')">AMBIL PESANAN</button>`;
-                    } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
-                        action = `<button class="action-btn" style="background:var(--primary); color:var(--bg)" onclick="finishOrder('${d.id}')">SELESAI & AMBIL POIN</button>`;
-                    } else { return; }
-                }
-
-                list.innerHTML += `
-                    <div class="order-card" style="animation-delay: ${idx * 0.1}s">
-                        <span class="status-tag">${item.status}</span>
-                        <span class="cust-name">${item.customer}</span>
-                        <a href="${waLink}" target="_blank" class="wa-link">
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.17-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-                            </svg>
-                            Hubungi WA
-                        </a>
-                        ${action}
-                    </div>`;
-            });
-        });
-
-        onSnapshot(collection(db, "driver_stats"), (snap) => {
-            const drivers = [];
-            snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
-            drivers.sort((a,b) => b.points - a.points);
-            const lb = document.getElementById('leaderboard');
-            lb.innerHTML = "";
-            drivers.forEach((drv, idx) => {
-                const bg = ['gold', 'silver', 'bronze'];
-                lb.innerHTML += `<div class="rank-card" style="animation-delay: ${idx * 0.1}s">
-                    <div class="rank-number">${idx+1}</div>
-                    <div style="flex:1">
-                        <div style="font-weight:800; font-size:17px;">${drv.id}</div>
-                        <span class="badge ${bg[idx] || ''}">${bg[idx] || 'ELITE DRIVER'}</span>
-                    </div>
-                    <div style="text-align:right">
-                        <div style="color:var(--primary); font-weight:900; font-size:1.4rem;">${drv.points}</div>
-                        <small style="font-size:9px; font-weight:800; color:var(--text-dim)">Poin</small>
-                    </div>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI")), (snap) => {
-            const hl = document.getElementById('history-list');
-            hl.innerHTML = "";
-            snap.docs.sort((a,b) => b.data().finishedAt?.seconds - a.data().finishedAt?.seconds).slice(0, 10).forEach(d => {
-                const item = d.data();
-                hl.innerHTML += `<div class="order-card" style="border:none; background:rgba(255,255,255,0.02); opacity:0.6">
-                    <small style="font-size:9px; font-weight:800; color:var(--text-dim)">${item.driver.toUpperCase()} COMPLETED</small>
-                    <div style="font-weight:700;">${item.customer}</div>
-                </div>`;
-            });
-        });
-    }
-
-    window.createOrder = async () => {
-        const n = document.getElementById('cust-name').value;
-        const w = document.getElementById('cust-wa').value;
-        if(n && w) {
-            await addDoc(collection(db, "orders"), { customer: n, wa: w, status: "DAPUR", createdAt: serverTimestamp() });
-            showToast("Order Masuk Dapur!", "🍳");
-            document.getElementById('cust-name').value = ""; document.getElementById('cust-wa').value = "";
-        }
-    };
-
-    window.updateStatus = async (id, status) => {
-        await updateDoc(doc(db, "orders", id), { status: status });
-        showToast("Siap di-pickup!", "🚀");
-    };
-
-    window.takeOrder = async (id) => {
-        await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name });
-        showToast("Hati-hati di jalan!", "🛵");
-    };
-
-    window.finishOrder = async (id) => {
-        await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
-        const dr = doc(db, "driver_stats", currentUser.name);
-        const ds = await getDoc(dr);
-        if (ds.exists()) await updateDoc(dr, { points: ds.data().points + 200 });
-        else await setDoc(dr, { points: 200 });
-        showToast("+200 Poin Berhasil!", "💰");
-    };
-
-    window.switchTab = (t) => {
+    window.handleSwitchTab = (t) => {
         document.getElementById('order-section').classList.toggle('hidden', t!=='order');
         document.getElementById('rank-section').classList.toggle('hidden', t!=='rank');
         document.getElementById('rekap-section').classList.toggle('hidden', t!=='rekap');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-' + t).classList.add('active');
     };
+
+    const currentUser = JSON.parse(localStorage.getItem('macca_user'));
+
+    if (currentUser) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-ui').classList.remove('hidden');
+        document.getElementById('user-display').innerText = currentUser.name;
+        if (currentUser.role === 'admin') document.getElementById('admin-only-form').classList.remove('hidden');
+
+        // GREETING
+        if (localStorage.getItem('just_logged_in')) {
+            const overlay = document.getElementById('greeting-overlay');
+            overlay.classList.remove('hidden');
+            document.getElementById('greeting-content').innerHTML = currentUser.role === 'admin' ? `Assalamualaikum<br><span style="color:#fff">Gadis-Gadis..!!!</span>` : `Selamat Bekerja<br><span style="color:#fff">Bro..!!! 🛵</span>`;
+            setTimeout(() => { 
+                overlay.style.opacity = '0'; 
+                setTimeout(() => overlay.classList.add('hidden'), 800); 
+                localStorage.removeItem('just_logged_in'); 
+            }, 2500);
+        }
+
+        // TAB ORDER
+        onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
+            const list = document.getElementById('list-orders');
+            list.innerHTML = snap.empty ? `<div style="text-align:center;margin-top:50px;color:var(--text-dim)">☕ Santai dulu...</div>` : "";
+            snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
+                const item = d.data();
+                const cleanWA = item.wa.replace(/\D/g, '').replace(/^0/, '62');
+                let action = "";
+
+                if (currentUser.role === 'admin') {
+                    if (item.status === 'DAPUR') {
+                        action = `
+                            <button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
+                            <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">BATALKAN & HAPUS ORDER</button>
+                        `;
+                    } else if (item.status === 'SIAP') {
+                        action = `
+                            <div style="color:var(--accent-blue);text-align:center;margin:15px 0;font-weight:800;font-size:11px">MENUNGGU DRIVER...</div>
+                            <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS ORDERAN</button>
+                        `;
+                    } else {
+                        action = `
+                            <div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>
+                            <button class="danger-btn" style="background:var(--accent-red); color:white; opacity: 0.5" onclick="window.deleteOrder('${d.id}')">ADMIN: HAPUS PAKSA</button>
+                        `;
+                    }
+                } else {
+                    if (item.status === 'SIAP') {
+                        action = `<button class="action-btn" style="background:#10b981;color:#000" onclick="window.takeOrder('${d.id}')">AMBIL PESANAN</button>`;
+                    } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
+                        action = `
+                            <button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SELESAI</button>
+                            <button class="danger-btn" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL AMBIL (KEMBALIKAN)</button>
+                        `;
+                    } else if (item.status === 'DIANTAR' && item.driver !== currentUser.name) {
+                        action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>`;
+                    } else if (item.status === 'DAPUR') {
+                        action = `<button class="action-btn" style="background:rgba(255,255,255,0.05);color:var(--text-dim)" disabled>PROSES DAPUR</button>`;
+                    } else return;
+                }
+
+                list.innerHTML += `
+                <div class="order-card">
+                    <span class="status-tag">${item.status}</span>
+                    <span class="admin-badge">📡 By: ${item.adminOnDuty}</span>
+                    <span class="cust-name">${item.customer}</span>
+                    <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg>
+                    </a>
+                    ${action}
+                </div>`;
+            });
+        });
+
+        // RANKING UPDATED WITH ORDER COUNT
+        onSnapshot(collection(db, "driver_stats"), (snap) => {
+            const lb = document.getElementById('leaderboard'); lb.innerHTML = "";
+            const drivers = []; snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
+            drivers.sort((a,b) => b.points - a.points).forEach((drv, idx) => {
+                const total = drv.totalOrders || 0;
+                lb.innerHTML += `
+                <div class="order-card" style="display:flex;align-items:center;padding:15px">
+                    <div style="font-size:20px;font-weight:900;color:var(--primary);width:35px;opacity:0.5">${idx+1}</div>
+                    <div style="flex:1">
+                        <div style="font-weight:800;">${drv.id}</div>
+                        <div style="color:var(--accent-green);font-size:10px;font-weight:800;margin-top:2px;">🛵 ${total} ORDERS</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points}</div>
+                        <div style="font-size:9px;color:var(--text-dim);font-weight:700">POINTS</div>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // TAB HISTORY
+        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(15)), (snap) => {
+            const histList = document.getElementById('history-list');
+            if (snap.empty) { histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; return; }
+            const docs = snap.docs.sort((a, b) => (b.data().finishedAt?.seconds || 0) - (a.data().finishedAt?.seconds || 0));
+            histList.innerHTML = "";
+            let lastDate = "";
+            docs.forEach(d => {
+                const item = d.data(); if (!item.finishedAt) return;
+                const dateObj = new Date(item.finishedAt.seconds * 1000);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                const timeStr = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                if (dateStr !== lastDate) { histList.innerHTML += `<div class="history-date-sep">${dateStr}</div>`; lastDate = dateStr; }
+                histList.innerHTML += `<div class="order-card" style="opacity:0.8; padding: 15px"><div style="display:flex;justify-content:space-between"><div><span class="status-tag" style="color:var(--text-dim)">SUCCESS</span><span class="cust-name" style="font-size:1rem">${item.customer}</span><small style="color:var(--accent-green);font-weight:800;font-size:10px">Driver: ${item.driver}</small></div><span style="color:var(--primary);font-weight:800;font-size:12px">${timeStr}</span></div></div>`;
+            });
+        });
+
+        // ACTIONS
+        window.handleCreateOrder = async () => {
+            const n = document.getElementById('cust-name').value;
+            const w = document.getElementById('cust-wa').value;
+            if(n && w) {
+                await addDoc(collection(db, "orders"), { customer: n, wa: w, status: "DAPUR", adminOnDuty: currentUser.name, createdAt: serverTimestamp() });
+                window.showToast("Order Dikirim ke Dapur!", "🍳");
+                document.getElementById('cust-name').value = ""; document.getElementById('cust-wa').value = "";
+            }
+        };
+
+        window.updateStatus = async (id, status) => { await updateDoc(doc(db, "orders", id), { status: status }); };
+        
+        window.deleteOrder = async (id) => { 
+            if(confirm("HAPUS PERMANEN?")) {
+                await deleteDoc(doc(db, "orders", id)); 
+                window.showToast("Orderan Dihapus", "🗑️");
+            }
+        };
+
+        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); };
+        
+        window.cancelTake = async (id) => { 
+            if(confirm("Batalkan pengantaran Anda?")) {
+                await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); 
+                window.showToast("Dibatalkan!", "↩️");
+            }
+        };
+
+        window.finishOrder = async (id) => {
+            await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
+            
+            // UPDATE DRIVER STATS (POINTS + TOTAL ORDERS)
+            const dr = doc(db, "driver_stats", currentUser.name);
+            const ds = await getDoc(dr);
+            if (ds.exists()) {
+                await updateDoc(dr, { 
+                    points: increment(200),
+                    totalOrders: increment(1)
+                });
+            } else {
+                await setDoc(dr, { 
+                    points: 200,
+                    totalOrders: 1
+                });
+            }
+            window.showToast("Alhamdulillah, Selesai!", "⭐");
+        };
+    }
 </script>
 </body>
 </html>
