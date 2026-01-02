@@ -29,43 +29,36 @@
 
         .app-container { width: 100%; max-width: 420px; padding: 20px; }
 
-        /* GREETING OVERLAY */
         #greeting-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 15, 26, 0.95); backdrop-filter: blur(25px);
+            background: radial-gradient(circle, rgba(30, 41, 59, 0.98) 0%, rgba(11, 15, 26, 1) 100%);
+            backdrop-filter: blur(30px);
             z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.8s ease; opacity: 1;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1;
         }
+
         .greet-text {
-            font-size: 1.8rem; font-weight: 900; color: var(--primary); text-align: center;
-            padding: 0 30px; line-height: 1.4; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 2.2rem; font-weight: 900; color: var(--primary); text-align: center;
+            padding: 0 40px; line-height: 1.3; animation: superPulse 2s ease-in-out infinite;
         }
 
-        /* WA PULSE ICON */
+        @keyframes superPulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
         .wa-float {
-            position: absolute; top: 15px; right: 15px;
-            width: 45px; height: 45px;
-            background: var(--accent-green);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-            animation: waPulse 2s infinite;
-            text-decoration: none;
-            z-index: 10;
-        }
-        @keyframes waPulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+            position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
+            background: var(--accent-green); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); text-decoration: none; z-index: 10;
         }
 
-        /* Toast */
         #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 85%; pointer-events: none; }
         .toast {
             background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
             padding: 16px 20px; border-radius: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            animation: toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), toastOut 0.5s 2.5s forwards;
+            animation: toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .hidden { display: none !important; }
@@ -78,10 +71,19 @@
         .btn-admin { background: var(--primary); color: #000; }
         .btn-driver { background: #10b981; color: #000; }
         
+        .pin-display {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 15px; font-size: 1.8rem; letter-spacing: 8px;
+            color: var(--primary); font-weight: 800; margin-bottom: 20px; min-height: 65px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-items: center; max-width: 280px; margin: 0 auto; }
         .num-btn { 
             background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white;
             width: 65px; height: 65px; border-radius: 50%; font-size: 1.4rem; font-weight: 800; cursor: pointer;
         }
+        .num-btn:active { background: var(--primary); color: black; }
 
         .nav-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; background: rgba(255,255,255,0.03); 
@@ -92,29 +94,22 @@
 
         .order-card { 
             background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; 
-            margin-bottom: 16px; border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both;
-            position: relative;
+            margin-bottom: 16px; border: 1px solid var(--glass-border); animation: slideUp 0.6s ease both; position: relative;
         }
-        .cust-name { font-size: 1.2rem; font-weight: 800; display: block; margin-top: 4px; color: var(--text-main); max-width: 70%; }
-        .admin-badge { font-size: 9px; font-weight: 700; color: var(--accent-blue); opacity: 0.8; margin-bottom: 5px; display: block; }
+        .cust-name { font-size: 1.2rem; font-weight: 800; display: block; margin-top: 4px; color: var(--text-main); }
+        .cust-address { font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); display: block; margin-top: 4px; }
         .status-tag { font-size: 9px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
         .action-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; margin-top: 15px; }
-        .danger-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; margin-top: 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .danger-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; margin-top: 20px; font-size: 10px; }
         
-        .history-date-sep {
-            font-size: 11px; font-weight: 800; color: var(--primary); 
-            margin: 25px 0 15px 10px; display: flex; align-items: center; gap: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
+        .history-date-sep { font-size: 11px; font-weight: 800; color: var(--primary); margin: 25px 0 15px 10px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         .history-date-sep::after { content: ""; flex: 1; height: 1px; background: rgba(245, 158, 11, 0.2); }
 
-        input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem;}
+        input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; }
 
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-        @keyframes toastOut { to { transform: translate(-50%, -150%); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -128,22 +123,32 @@
             <h1 style="color:var(--primary); font-size: 2.2rem; margin:0; letter-spacing: -2px; font-weight: 900;">MACCA</h1>
             <p style="color:var(--text-dim); font-weight: 700; font-size: 0.75rem; letter-spacing: 2px;">PREMIUM DELIVERY</p>
         </div>
+
         <div id="step-1">
             <div class="role-selector">
                 <button class="btn-role btn-admin" onclick="handleRoleSelection('admin')"><span>ADMIN</span><small>DAPUR</small></button>
                 <button class="btn-role btn-driver" onclick="handleRoleSelection('driver')"><span>DRIVER</span><small>PENGANTARAN</small></button>
             </div>
         </div>
+
         <div id="step-2" class="hidden">
-            <p id="role-title" style="color:var(--primary); font-weight: 800; margin-bottom: 20px; text-transform: uppercase;"></p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; max-width: 260px; margin: 0 auto;">
-                <button class="num-btn" onclick="handlePressNum(1)">1</button>
-                <button class="num-btn" onclick="handlePressNum(2)">2</button>
-                <button class="num-btn" onclick="handlePressNum(3)">3</button>
-                <button class="num-btn" onclick="handlePressNum(8)">8</button>
-                <button class="num-btn" onclick="handlePressNum(9)">9</button>
-                <button class="num-btn" style="background:rgba(239, 68, 68, 0.15); color:#ef4444" onclick="handleResetLogin()">🔙</button>
+            <p id="role-title" style="color:var(--primary); font-weight: 800; margin-bottom: 10px; text-transform: uppercase;"></p>
+            <div id="pin-view" class="pin-display"></div>
+            <div class="num-grid">
+                <button class="num-btn" onclick="handlePressNum('1')">1</button>
+                <button class="num-btn" onclick="handlePressNum('2')">2</button>
+                <button class="num-btn" onclick="handlePressNum('3')">3</button>
+                <button class="num-btn" onclick="handlePressNum('4')">4</button>
+                <button class="num-btn" onclick="handlePressNum('5')">5</button>
+                <button class="num-btn" onclick="handlePressNum('6')">6</button>
+                <button class="num-btn" onclick="handlePressNum('7')">7</button>
+                <button class="num-btn" onclick="handlePressNum('8')">8</button>
+                <button class="num-btn" onclick="handlePressNum('9')">9</button>
+                <button class="num-btn" style="background:rgba(239, 68, 68, 0.15); color:#ef4444" onclick="handleClearPin()">CLR</button>
+                <button class="num-btn" onclick="handlePressNum('0')">0</button>
+                <button class="num-btn" style="background:var(--primary); color:black;" onclick="handleLoginSubmit()">OK</button>
             </div>
+            <button onclick="handleResetLogin()" style="background:none; border:none; color:var(--text-dim); margin-top:30px; font-weight:800; cursor:pointer;">KEMBALI KE MENU UTAMA</button>
         </div>
     </div>
 
@@ -162,6 +167,7 @@
         <section id="order-section">
             <div id="admin-only-form" class="hidden" style="margin-bottom: 25px;">
                 <input type="text" id="cust-name" placeholder="Nama Pelanggan">
+                <input type="text" id="cust-address" placeholder="Alamat Pengiriman">
                 <input type="text" id="cust-wa" placeholder="WhatsApp (Contoh: 0812...)">
                 <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleCreateOrder()">KIRIM KE DAPUR</button>
             </div>
@@ -190,21 +196,56 @@
     const db = getFirestore(app);
 
     const USERS_DB = {
-        8: { name: 'MANDA', role: 'admin' }, 9: { name: 'NUNU', role: 'admin' },
-        1: { name: 'HASBI', role: 'driver' }, 2: { name: 'REZKY', role: 'driver' }, 3: { name: 'ASWAR', role: 'driver' }
+        '8': { name: 'MANDA', role: 'admin' }, 
+        '9': { name: 'NUNU', role: 'admin' },
+        '3': { name: 'ARA', role: 'admin' }, 
+        '4': { name: 'DILLA', role: 'admin' },
+        '11': { name: 'HASBI', role: 'driver' }, 
+        '22': { name: 'REZKY', role: 'driver' }, 
+        '33': { name: 'ASWAR', role: 'driver' } 
     };
 
     let selectedRoleType = '';
-    window.handleRoleSelection = (role) => { selectedRoleType = role; document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); document.getElementById('role-title').innerText = "PIN " + role; };
-    window.handleResetLogin = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
+    let currentPinInput = '';
+
+    window.handleRoleSelection = (role) => { 
+        selectedRoleType = role; 
+        currentPinInput = '';
+        document.getElementById('step-1').classList.add('hidden'); 
+        document.getElementById('step-2').classList.remove('hidden'); 
+        document.getElementById('role-title').innerText = "PIN " + role;
+        document.getElementById('pin-view').innerText = '';
+    };
+
+    window.handleResetLogin = () => { 
+        document.getElementById('step-2').classList.add('hidden'); 
+        document.getElementById('step-1').classList.remove('hidden'); 
+    };
+
+    window.handleClearPin = () => {
+        currentPinInput = '';
+        document.getElementById('pin-view').innerText = '';
+    };
+
     window.handlePressNum = (num) => {
-        const user = USERS_DB[num];
+        if (currentPinInput.length < 4) {
+            currentPinInput += num;
+            document.getElementById('pin-view').innerText = '*'.repeat(currentPinInput.length);
+        }
+    };
+
+    window.handleLoginSubmit = () => {
+        const user = USERS_DB[currentPinInput];
         if (user && user.role === selectedRoleType) {
             localStorage.setItem('macca_user', JSON.stringify(user));
             localStorage.setItem('just_logged_in', 'true');
             location.reload();
-        } else { window.showToast("PIN Salah!", "⚠️"); }
+        } else {
+            window.showToast("PIN atau Role Salah!", "⚠️");
+            window.handleClearPin();
+        }
     };
+
     window.handleLogout = () => { localStorage.clear(); location.reload(); };
     window.showToast = (msg, icon = '✨') => {
         const container = document.getElementById('toast-container');
@@ -231,157 +272,121 @@
         document.getElementById('user-display').innerText = currentUser.name;
         if (currentUser.role === 'admin') document.getElementById('admin-only-form').classList.remove('hidden');
 
-        // GREETING
         if (localStorage.getItem('just_logged_in')) {
             const overlay = document.getElementById('greeting-overlay');
+            const content = document.getElementById('greeting-content');
             overlay.classList.remove('hidden');
-            document.getElementById('greeting-content').innerHTML = currentUser.role === 'admin' ? `Assalamualaikum<br><span style="color:#fff">Gadis-Gadis..!!!</span>` : `Selamat Bekerja<br><span style="color:#fff">Bro..!!! 🛵</span>`;
+            content.innerHTML = currentUser.role === 'admin' ? 
+                `Assalamualaikum<br><span style="color:#fff; font-size:2.8rem;">Gadis-Gadis..!!!</span>` : 
+                `Selamat Bekerja<br><span style="color:#fff; font-size:2.8rem;">Bro..!!! 🛵</span>`;
             setTimeout(() => { 
                 overlay.style.opacity = '0'; 
-                setTimeout(() => overlay.classList.add('hidden'), 800); 
+                setTimeout(() => overlay.classList.add('hidden'), 1000); 
                 localStorage.removeItem('just_logged_in'); 
-            }, 2500);
+            }, 3000);
         }
 
-        // TAB ORDER
+        // --- REALTIME DATA FETCHING ---
         onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
             const list = document.getElementById('list-orders');
-            list.innerHTML = snap.empty ? `<div style="text-align:center;margin-top:50px;color:var(--text-dim)">☕ Santai dulu...</div>` : "";
+            if (snap.empty) {
+                list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">${currentUser.role === 'admin' ? 'NGERUMPI DULU SIS...' : 'SANTAI DULU BRO.. ☕'}</div>`; return;
+            }
+            list.innerHTML = "";
             snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
                 const item = d.data();
                 const cleanWA = item.wa.replace(/\D/g, '').replace(/^0/, '62');
                 let action = "";
-
                 if (currentUser.role === 'admin') {
                     if (item.status === 'DAPUR') {
-                        action = `
-                            <button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
-                            <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">BATALKAN & HAPUS ORDER</button>
-                        `;
+                        action = `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
+                                  <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">BATALKAN & HAPUS ORDER</button>`;
                     } else if (item.status === 'SIAP') {
-                        action = `
-                            <div style="color:var(--accent-blue);text-align:center;margin:15px 0;font-weight:800;font-size:11px">MENUNGGU DRIVER...</div>
-                            <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS ORDERAN</button>
-                        `;
+                        action = `<div style="color:var(--accent-blue);text-align:center;margin:15px 0;font-weight:800;font-size:11px">MENUNGGU DRIVER...</div>
+                                  <button class="danger-btn" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS ORDERAN</button>`;
                     } else {
-                        action = `
-                            <div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>
-                            <button class="danger-btn" style="background:var(--accent-red); color:white; opacity: 0.5" onclick="window.deleteOrder('${d.id}')">ADMIN: HAPUS PAKSA</button>
-                        `;
+                        action = `<div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>`;
                     }
                 } else {
                     if (item.status === 'SIAP') {
                         action = `<button class="action-btn" style="background:#10b981;color:#000" onclick="window.takeOrder('${d.id}')">AMBIL PESANAN</button>`;
                     } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
-                        action = `
-                            <button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SELESAI</button>
-                            <button class="danger-btn" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL AMBIL (KEMBALIKAN)</button>
-                        `;
-                    } else if (item.status === 'DIANTAR' && item.driver !== currentUser.name) {
+                        action = `<button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SELESAI</button>
+                                  <button class="danger-btn" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL AMBIL (KEMBALIKAN)</button>`;
+                    } else if (item.status === 'DIANTAR') {
                         action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} SEDANG MENGANTAR</div>`;
-                    } else if (item.status === 'DAPUR') {
+                    } else {
                         action = `<button class="action-btn" style="background:rgba(255,255,255,0.05);color:var(--text-dim)" disabled>PROSES DAPUR</button>`;
-                    } else return;
+                    }
                 }
-
-                list.innerHTML += `
-                <div class="order-card">
+                list.innerHTML += `<div class="order-card">
                     <span class="status-tag">${item.status}</span>
-                    <span class="admin-badge">📡 By: ${item.adminOnDuty}</span>
+                    <span style="font-size:9px; color:var(--text-dim); display:block; margin-bottom:5px;">By: ${item.adminOnDuty}</span>
                     <span class="cust-name">${item.customer}</span>
+                    <span class="cust-address">📍 ${item.address}</span>
                     <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg>
-                    </a>
-                    ${action}
-                </div>`;
+                    </a>${action}</div>`;
             });
         });
 
-        // RANKING UPDATED WITH ORDER COUNT
         onSnapshot(collection(db, "driver_stats"), (snap) => {
             const lb = document.getElementById('leaderboard'); lb.innerHTML = "";
             const drivers = []; snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
             drivers.sort((a,b) => b.points - a.points).forEach((drv, idx) => {
-                const total = drv.totalOrders || 0;
-                lb.innerHTML += `
-                <div class="order-card" style="display:flex;align-items:center;padding:15px">
+                lb.innerHTML += `<div class="order-card" style="display:flex;align-items:center;padding:15px">
                     <div style="font-size:20px;font-weight:900;color:var(--primary);width:35px;opacity:0.5">${idx+1}</div>
-                    <div style="flex:1">
-                        <div style="font-weight:800;">${drv.id}</div>
-                        <div style="color:var(--accent-green);font-size:10px;font-weight:800;margin-top:2px;">🛵 ${total} ORDERS</div>
+                    <div style="flex:1"><div style="font-weight:800;">${drv.id}</div>
+                        <div style="color:var(--accent-green);font-size:10px;font-weight:800;">🛵 ${drv.totalOrders || 0} ORDERS</div>
                     </div>
-                    <div style="text-align:right">
-                        <div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points}</div>
+                    <div style="text-align:right"><div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points}</div>
                         <div style="font-size:9px;color:var(--text-dim);font-weight:700">POINTS</div>
-                    </div>
-                </div>`;
+                    </div></div>`;
             });
         });
 
-        // TAB HISTORY
-        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(15)), (snap) => {
+        onSnapshot(query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(20)), (snap) => {
             const histList = document.getElementById('history-list');
             if (snap.empty) { histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; return; }
             const docs = snap.docs.sort((a, b) => (b.data().finishedAt?.seconds || 0) - (a.data().finishedAt?.seconds || 0));
-            histList.innerHTML = "";
-            let lastDate = "";
+            histList.innerHTML = ""; let lastDate = "";
             docs.forEach(d => {
                 const item = d.data(); if (!item.finishedAt) return;
                 const dateObj = new Date(item.finishedAt.seconds * 1000);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                const timeStr = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 if (dateStr !== lastDate) { histList.innerHTML += `<div class="history-date-sep">${dateStr}</div>`; lastDate = dateStr; }
-                histList.innerHTML += `<div class="order-card" style="opacity:0.8; padding: 15px"><div style="display:flex;justify-content:space-between"><div><span class="status-tag" style="color:var(--text-dim)">SUCCESS</span><span class="cust-name" style="font-size:1rem">${item.customer}</span><small style="color:var(--accent-green);font-weight:800;font-size:10px">Driver: ${item.driver}</small></div><span style="color:var(--primary);font-weight:800;font-size:12px">${timeStr}</span></div></div>`;
+                histList.innerHTML += `<div class="order-card" style="opacity:0.85; padding: 15px">
+                    <div style="display:flex;justify-content:space-between;">
+                        <div style="flex:1"><span class="status-tag" style="color:var(--text-dim)">SUCCESS</span><span class="cust-name" style="font-size:1rem">${item.customer}</span>
+                            <div style="font-size:0.8rem; color:var(--accent-blue); margin-top:2px;">📍 ${item.address}</div>
+                            <div style="color:var(--accent-green);font-weight:800;font-size:10px; margin-top:5px;">🛵 Driver: ${item.driver}</div>
+                        </div>
+                        <div style="text-align:right"><span style="color:var(--primary);font-weight:800;font-size:12px">${dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span></div>
+                    </div></div>`;
             });
         });
 
-        // ACTIONS
         window.handleCreateOrder = async () => {
             const n = document.getElementById('cust-name').value;
+            const a = document.getElementById('cust-address').value;
             const w = document.getElementById('cust-wa').value;
-            if(n && w) {
-                await addDoc(collection(db, "orders"), { customer: n, wa: w, status: "DAPUR", adminOnDuty: currentUser.name, createdAt: serverTimestamp() });
-                window.showToast("Order Dikirim ke Dapur!", "🍳");
-                document.getElementById('cust-name').value = ""; document.getElementById('cust-wa').value = "";
-            }
+            if(n && a && w) {
+                await addDoc(collection(db, "orders"), { customer: n, address: a, wa: w, status: "DAPUR", adminOnDuty: currentUser.name, createdAt: serverTimestamp() });
+                window.showToast("Order Dikirim!", "🍳");
+                document.getElementById('cust-name').value = ""; document.getElementById('cust-address').value = ""; document.getElementById('cust-wa').value = "";
+            } else { window.showToast("Lengkapi data!", "⚠️"); }
         };
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, "orders", id), { status: status }); };
-        
-        window.deleteOrder = async (id) => { 
-            if(confirm("HAPUS PERMANEN?")) {
-                await deleteDoc(doc(db, "orders", id)); 
-                window.showToast("Orderan Dihapus", "🗑️");
-            }
-        };
-
+        window.deleteOrder = async (id) => { if(confirm("Hapus Order?")) await deleteDoc(doc(db, "orders", id)); };
         window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); };
-        
-        window.cancelTake = async (id) => { 
-            if(confirm("Batalkan pengantaran Anda?")) {
-                await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); 
-                window.showToast("Dibatalkan!", "↩️");
-            }
-        };
-
+        window.cancelTake = async (id) => { if(confirm("Batalkan ambil?")) await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); };
         window.finishOrder = async (id) => {
             await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
-            
-            // UPDATE DRIVER STATS (POINTS + TOTAL ORDERS)
             const dr = doc(db, "driver_stats", currentUser.name);
             const ds = await getDoc(dr);
-            if (ds.exists()) {
-                await updateDoc(dr, { 
-                    points: increment(200),
-                    totalOrders: increment(1)
-                });
-            } else {
-                await setDoc(dr, { 
-                    points: 200,
-                    totalOrders: 1
-                });
-            }
-            window.showToast("Alhamdulillah, Selesai!", "⭐");
+            if (ds.exists()) { await updateDoc(dr, { points: increment(200), totalOrders: increment(1) }); } 
+            else { await setDoc(dr, { points: 200, totalOrders: 1 }); }
         };
     }
 </script>
