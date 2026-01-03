@@ -351,7 +351,7 @@
                     }
                 });
 
-                if (snap.empty) { list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">Kosong Bro..</div>`; return; }
+                if (snap.empty) { list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">Ngerumpi Dulu Sis..Mumpung Orderan Belum Masuk</div>`; return; }
                 
                 list.innerHTML = "";
                 snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
@@ -448,3 +448,4 @@
 </script>
 </body>
 </html>
+
