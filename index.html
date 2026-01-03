@@ -431,11 +431,12 @@
             await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
             const dr = doc(db, "driver_stats", currentUser.name);
             const ds = await getDoc(dr);
-            if (ds.exists()) { await updateDoc(dr, { points: increment(200), totalOrders: increment(1) }); } 
-            else { await setDoc(dr, { points: 200, totalOrders: 1 }); }
+            if (ds.exists()) { await updateDoc(dr, { points: increment(500), totalOrders: increment(1) }); } 
+            else { await setDoc(dr, { points: 500, totalOrders: 1 }); }
             window.showToast("Orderan Selesai! Cuan masuk kantong!", "💰");
         };
     }
 </script>
 </body>
 </html>
+
