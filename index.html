@@ -188,7 +188,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment, orderBy, enableIndexedDbPersistence, terminate, clearIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAWl_NXUXwt29rLArj79j8RlM8bY6kOCCg",
@@ -202,10 +202,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // MENGAKTIFKAN OFFLINE PERSISTENCE (Kunci utama agar background sync lebih lancar)
+    // PERSISTENCE DENGAN ERROR HANDLING
     enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code == 'failed-precondition') { console.log("Persistence failed: Multi-tabs open"); } 
-        else if (err.code == 'unimplemented') { console.log("Persistence unavailable"); }
+        console.log("Persistence error:", err.code);
     });
 
     const USERS_DB = {
@@ -220,6 +219,18 @@
 
     let selectedRoleType = '';
     let currentPinInput = '';
+    let knownOrders = new Set();
+    const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+    // UNLOCK AUDIO UNTUK MOBILE
+    const unlockAudio = () => {
+        notifSound.play().then(() => {
+            notifSound.pause();
+            notifSound.currentTime = 0;
+        }).catch(e => console.log("Audio waiting..."));
+        document.removeEventListener('click', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio);
 
     window.showToast = (msg, icon = '✨') => {
         const container = document.getElementById('toast-container');
@@ -235,33 +246,17 @@
         }, 3000);
     };
 
-    // --- LOGIKA NOTIFIKASI AGRESIF ---
-    const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    
-    // Pastikan suara ter-load
-    notifSound.load();
-
-    async function requestNotifPermission() {
-        if ("Notification" in window) {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') console.log("Notifikasi aktif");
-        }
-    }
-
     function triggerNewOrderAlert(customer, address) {
-        // Mainkan suara berkali-kali jika perlu agar driver sadar
-        notifSound.play().catch(e => console.log("Menunggu interaksi user"));
-        
+        notifSound.play().catch(() => {});
         if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
 
-        if (Notification.permission === "granted") {
-            const n = new Notification("ADA ORDERAN SIAP!", {
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("ADA ORDERAN SIAP!", {
                 body: `${customer} | 📍 ${address}`,
                 icon: "https://cdn-icons-png.flaticon.com/512/2830/2830305.png",
-                tag: 'new-order', // Mencegah spam notifikasi yang sama
+                tag: 'new-order',
                 renotify: true
             });
-            n.onclick = () => { window.focus(); n.close(); };
         }
     }
 
@@ -270,7 +265,7 @@
         document.getElementById('step-1').classList.add('hidden'); 
         document.getElementById('step-2').classList.remove('hidden'); 
         document.getElementById('role-title').innerText = "PIN " + role;
-        requestNotifPermission(); 
+        if ("Notification" in window) Notification.requestPermission();
     };
 
     window.handleResetLogin = () => { 
@@ -333,38 +328,44 @@
             }, 3000);
         }
 
-        // --- OPTIMASI MONITORING ORDERAN ---
-        let knownOrders = new Set(); // Melacak order yang sudah muncul agar tidak double notif
-
+        // MONITORING ORDERAN (DIPERBAIKI)
         const startListening = () => {
-            onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
+            // Kita pantau semua order yang belum SELESAI
+            const q = query(collection(db, "orders"), where("status", "!=", "SELESAI"));
+            
+            onSnapshot(q, (snap) => {
                 const list = document.getElementById('list-orders');
-                
+                const now = Date.now();
+
                 snap.docChanges().forEach(change => {
                     const data = change.doc.data();
                     const id = change.doc.id;
+                    const createdAt = data.createdAt?.toMillis() || 0;
 
-                    // Jika ada orderan baru berstatus SIAP dan driver sedang login
+                    // LOGIKA NOTIFIKASI:
+                    // 1. Harus Driver
+                    // 2. Status SIAP
+                    // 3. Waktu pembuatan tidak lebih lama dari 30 detik (menghindari notif orderan basi)
                     if (currentUser.role === 'driver' && data.status === "SIAP") {
-                        if (change.type === "added" || change.type === "modified") {
-                            // Cek jika orderan ini benar-benar baru bagi sesi ini (menghindari notif data lama saat baru buka)
-                            const isNew = change.type === "added" && (Date.now() - (data.createdAt?.toMillis() || 0) < 10000);
-                            const becameReady = change.type === "modified";
-                            
-                            if ((isNew || becameReady) && !knownOrders.has(id)) {
-                                triggerNewOrderAlert(data.customer, data.address);
-                                knownOrders.add(id);
-                            }
+                        const isVeryRecent = (now - createdAt) < 30000; 
+                        
+                        if (isVeryRecent && !knownOrders.has(id)) {
+                            triggerNewOrderAlert(data.customer, data.address);
+                            knownOrders.add(id);
                         }
                     }
                 });
 
                 if (snap.empty) {
-                    list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">${currentUser.role === 'admin' ? 'NGERUMPI DULU SIS...' : 'SANTAI DULU BRO.. ☕'}</div>`; return;
+                    list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">${currentUser.role === 'admin' ? 'NGERUMPI DULU SIS...' : 'SANTAI DULU BRO.. ☕'}</div>`; 
+                    return;
                 }
 
+                // Render List
                 list.innerHTML = "";
-                snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
+                const sorted = snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0));
+                
+                sorted.forEach(d => {
                     const item = d.data();
                     const cleanWA = item.wa ? item.wa.replace(/\D/g, '').replace(/^0/, '62') : '';
                     let action = "";
@@ -378,7 +379,7 @@
                         } else if (item.status === 'SIAP') {
                             action = `<div class="action-group" style="align-items:center; background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 12px; margin-top: 15px;">
                                         <div style="flex:2; color:var(--accent-blue); text-align:center; font-weight:800; font-size:10px; letter-spacing:1px;">
-                                            <span class="waiting-icon">⏳</span>TUNGGU DRIVERNYA SIS...
+                                            <span class="waiting-icon">⏳</span>TUNGGU DRIVER...
                                         </div>
                                         <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS</button>
                                       </div>`;
@@ -397,7 +398,7 @@
                             action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} LAGI BERJUANG</div>`;
                         } else {
                             action = `<div style="text-align:center; color:var(--text-dim); font-size:10px; font-weight:800; margin-top:15px; background:rgba(255,255,255,0.05); padding: 10px; border-radius:10px;">
-                                        <span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK DIDAPUR...
+                                        <span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK...
                                       </div>`;
                         }
                     }
@@ -409,24 +410,27 @@
                         <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg>
                         </a>
-                        <div style="font-size: 8px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin-top:10px;">Dibuat: ${item.adminOnDuty}</div>
+                        <div style="font-size: 8px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin-top:10px;">Oleh: ${item.adminOnDuty}</div>
                         ${action}
                     </div>`;
                 });
+            }, (error) => {
+                console.error("Snapshot error:", error);
+                // Jika error (misal internet putus), coba restart setelah 5 detik
+                setTimeout(startListening, 5000);
             });
         };
 
-        // Jalankan listener
         startListening();
 
-        // RE-CONNECT JIKA APLIKASI DIBUKA KEMBALI (Fix Delay)
+        // PAKSA REFRESH SNAPSHOT SAAT TAB DIBUKA KEMBALI
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
-                console.log("App Resumed, Syncing...");
-                // Browser akan otomatis re-sync snapshot saat visible
+                window.showToast("Sinkronisasi...", "🔄");
             }
         });
 
+        // LEADERBOARD & HISTORY (Standard)
         onSnapshot(collection(db, "driver_stats"), (snap) => {
             const lb = document.getElementById('leaderboard'); lb.innerHTML = "";
             const drivers = []; snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
@@ -445,15 +449,8 @@
         const historyQuery = query(collection(db, "orders"), where("status", "==", "SELESAI"), limit(40));
         onSnapshot(historyQuery, (snap) => {
             const histList = document.getElementById('history-list');
-            if (snap.empty) { 
-                histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; 
-                return; 
-            }
-            const sortedDocs = snap.docs.sort((a, b) => {
-                const timeA = a.data().finishedAt?.seconds || a.data().createdAt?.seconds || 0;
-                const timeB = b.data().finishedAt?.seconds || b.data().createdAt?.seconds || 0;
-                return timeB - timeA;
-            });
+            if (snap.empty) { histList.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim)">Belum ada history.</div>`; return; }
+            const sortedDocs = snap.docs.sort((a, b) => (b.data().finishedAt?.seconds || 0) - (a.data().finishedAt?.seconds || 0));
             histList.innerHTML = ""; let lastDate = "";
             sortedDocs.forEach(d => {
                 const item = d.data();
@@ -483,6 +480,7 @@
             });
         });
 
+        // ACTIONS
         window.handleCreateOrder = async () => {
             const n = document.getElementById('cust-name').value;
             const a = document.getElementById('cust-address').value;
@@ -498,16 +496,16 @@
         };
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, "orders", id), { status: status }); };
-        window.deleteOrder = async (id) => { if(confirm("Beneran mau dihapus? Kasihan pelanggannya..")) { await deleteDoc(doc(db, "orders", id)); window.showToast("Orderan resmi dibuang ke tong sampah!", "🗑️"); } };
-        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); window.showToast("Siap Meluncur! Hati-hati di jalan Bro!", "🛵"); };
-        window.cancelTake = async (id) => { if(confirm("Yah, gak jadi nganter nih?")) { await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); window.showToast("Gak jadi nganter, balik rebahan lagi..", "😴"); } };
+        window.deleteOrder = async (id) => { if(confirm("Beneran mau dihapus?")) { await deleteDoc(doc(db, "orders", id)); window.showToast("Dihapus!", "🗑️"); } };
+        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); window.showToast("Hati-hati di jalan Bro!", "🛵"); };
+        window.cancelTake = async (id) => { if(confirm("Batal nganter?")) { await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); } };
         window.finishOrder = async (id) => {
             await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
             const dr = doc(db, "driver_stats", currentUser.name);
             const ds = await getDoc(dr);
             if (ds.exists()) { await updateDoc(dr, { points: increment(500), totalOrders: increment(1) }); } 
             else { await setDoc(dr, { points: 500, totalOrders: 1 }); }
-            window.showToast("Orderan Selesai! Cuan masuk kantong!", "💰");
+            window.showToast("Cuan masuk kantong!", "💰");
         };
     }
 </script>
