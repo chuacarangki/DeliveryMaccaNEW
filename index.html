@@ -30,6 +30,20 @@
 
         .app-container { width: 100%; max-width: 420px; padding: 20px; }
 
+        /* MODAL STYLE */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            z-index: 10001; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #1e293b; width: 90%; max-width: 380px; padding: 25px;
+            border-radius: 24px; border: 1px solid var(--primary);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
         #greeting-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, rgba(30, 41, 59, 0.98) 0%, rgba(11, 15, 26, 1) 100%);
@@ -109,6 +123,7 @@
         .action-group { display: flex; gap: 8px; margin-top: 15px; }
         .action-btn { flex: 2; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; }
         .danger-btn-small { flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; font-size: 10px; }
+        .edit-btn-small { background: #64748b; color: white; flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; font-size: 10px; }
 
         .history-date-sep { font-size: 11px; font-weight: 800; color: var(--primary); margin: 25px 0 15px 10px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         .history-date-sep::after { content: ""; flex: 1; height: 1px; background: rgba(245, 158, 11, 0.2); }
@@ -123,6 +138,20 @@
 
 <div id="toast-container"></div>
 <div id="greeting-overlay" class="hidden"><div id="greeting-content" class="greet-text"></div></div>
+
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="color:var(--primary); margin-top:0;">Edit Orderan</h3>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="edit-name" placeholder="Nama Pelanggan">
+        <input type="text" id="edit-address" placeholder="Alamat">
+        <input type="text" id="edit-wa" placeholder="WhatsApp">
+        <div class="action-group">
+            <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleUpdateOrder()">SIMPAN</button>
+            <button class="danger-btn-small" style="background:var(--accent-red); color:white" onclick="closeEditModal()">BATAL</button>
+        </div>
+    </div>
+</div>
 
 <div class="app-container">
     <div id="login-screen" class="login-screen">
@@ -188,7 +217,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment, orderBy, enableIndexedDbPersistence, terminate, clearIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, updateDoc, doc, serverTimestamp, setDoc, getDoc, limit, deleteDoc, increment, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAWl_NXUXwt29rLArj79j8RlM8bY6kOCCg",
@@ -202,35 +231,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // PERSISTENCE DENGAN ERROR HANDLING
-    enableIndexedDbPersistence(db).catch((err) => {
-        console.log("Persistence error:", err.code);
-    });
+    enableIndexedDbPersistence(db).catch(() => {});
 
     const USERS_DB = {
-        '8': { name: 'MANDA', role: 'admin' }, 
-        '9': { name: 'NUNU', role: 'admin' },
-        '3': { name: 'ARA', role: 'admin' }, 
-        '4': { name: 'DILLA', role: 'admin' },
-        '11': { name: 'HASBI', role: 'driver' }, 
-        '22': { name: 'REZKY', role: 'driver' }, 
-        '33': { name: 'ASWAR', role: 'driver' } 
+        '8': { name: 'MANDA', role: 'admin' }, '9': { name: 'NUNU', role: 'admin' },
+        '3': { name: 'ARA', role: 'admin' }, '4': { name: 'DILLA', role: 'admin' },
+        '11': { name: 'HASBI', role: 'driver' }, '22': { name: 'REZKY', role: 'driver' }, '33': { name: 'ASWAR', role: 'driver' } 
     };
 
     let selectedRoleType = '';
     let currentPinInput = '';
     let knownOrders = new Set();
     const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-
-    // UNLOCK AUDIO UNTUK MOBILE
-    const unlockAudio = () => {
-        notifSound.play().then(() => {
-            notifSound.pause();
-            notifSound.currentTime = 0;
-        }).catch(e => console.log("Audio waiting..."));
-        document.removeEventListener('click', unlockAudio);
-    };
-    document.addEventListener('click', unlockAudio);
 
     window.showToast = (msg, icon = '✨') => {
         const container = document.getElementById('toast-container');
@@ -249,41 +261,22 @@
     function triggerNewOrderAlert(customer, address) {
         notifSound.play().catch(() => {});
         if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
-
-        if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("ADA ORDERAN SIAP!", {
-                body: `${customer} | 📍 ${address}`,
-                icon: "https://cdn-icons-png.flaticon.com/512/2830/2830305.png",
-                tag: 'new-order',
-                renotify: true
-            });
+        if (Notification.permission === "granted") {
+            new Notification("ORDERAN BARU!", { body: `${customer} | 📍 ${address}`, icon: "https://cdn-icons-png.flaticon.com/512/2830/2830305.png" });
         }
     }
 
-    window.handleRoleSelection = (role) => { 
+    window.handleRoleSelection = (role) => {
         selectedRoleType = role; currentPinInput = '';
-        document.getElementById('step-1').classList.add('hidden'); 
-        document.getElementById('step-2').classList.remove('hidden'); 
+        document.getElementById('step-1').classList.add('hidden');
+        document.getElementById('step-2').classList.remove('hidden');
         document.getElementById('role-title').innerText = "PIN " + role;
         if ("Notification" in window) Notification.requestPermission();
     };
 
-    window.handleResetLogin = () => { 
-        document.getElementById('step-2').classList.add('hidden'); 
-        document.getElementById('step-1').classList.remove('hidden'); 
-    };
-
-    window.handleClearPin = () => {
-        currentPinInput = '';
-        document.getElementById('pin-view').innerText = '';
-    };
-
-    window.handlePressNum = (num) => {
-        if (currentPinInput.length < 4) {
-            currentPinInput += num;
-            document.getElementById('pin-view').innerText = '*'.repeat(currentPinInput.length);
-        }
-    };
+    window.handleResetLogin = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
+    window.handleClearPin = () => { currentPinInput = ''; document.getElementById('pin-view').innerText = ''; };
+    window.handlePressNum = (num) => { if (currentPinInput.length < 4) { currentPinInput += num; document.getElementById('pin-view').innerText = '*'.repeat(currentPinInput.length); } };
 
     window.handleLoginSubmit = () => {
         const user = USERS_DB[currentPinInput];
@@ -291,10 +284,7 @@
             localStorage.setItem('macca_user', JSON.stringify(user));
             localStorage.setItem('just_logged_in', 'true');
             location.reload();
-        } else {
-            window.showToast("Duh, PIN-nya salah tuh!", "❌");
-            window.handleClearPin();
-        }
+        } else { window.showToast("PIN Salah!", "❌"); window.handleClearPin(); }
     };
 
     window.handleLogout = () => { localStorage.clear(); location.reload(); };
@@ -318,131 +308,102 @@
             const overlay = document.getElementById('greeting-overlay');
             const content = document.getElementById('greeting-content');
             overlay.classList.remove('hidden');
-            content.innerHTML = currentUser.role === 'admin' ? 
-                `Assalamualaikum<br><span style="color:#fff; font-size:2.8rem;">Gadis-Gadis..!!!</span>` : 
-                `Selamat Bekerja<br><span style="color:#fff; font-size:2.8rem;">Bro..!!! 🛵</span>`;
-            setTimeout(() => { 
-                overlay.style.opacity = '0'; 
-                setTimeout(() => overlay.classList.add('hidden'), 1000); 
-                localStorage.removeItem('just_logged_in'); 
-            }, 3000);
+            content.innerHTML = currentUser.role === 'admin' ? `Assalamualaikum<br><span style="color:#fff; font-size:2.8rem;">Gadis-Gadis..!!!</span>` : `Selamat Bekerja<br><span style="color:#fff; font-size:2.8rem;">Bro..!!! 🛵</span>`;
+            setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 1000); localStorage.removeItem('just_logged_in'); }, 3000);
         }
 
-        // MONITORING ORDERAN (DIPERBAIKI)
+        // EDIT LOGIC
+        window.openEditModal = async (id) => {
+            const d = await getDoc(doc(db, "orders", id));
+            if(d.exists()) {
+                const data = d.data();
+                document.getElementById('edit-id').value = id;
+                document.getElementById('edit-name').value = data.customer;
+                document.getElementById('edit-address').value = data.address;
+                document.getElementById('edit-wa').value = data.wa;
+                document.getElementById('edit-modal').classList.add('active');
+            }
+        };
+
+        window.closeEditModal = () => { document.getElementById('edit-modal').classList.remove('active'); };
+
+        window.handleUpdateOrder = async () => {
+            const id = document.getElementById('edit-id').value;
+            const n = document.getElementById('edit-name').value;
+            const a = document.getElementById('edit-address').value;
+            const w = document.getElementById('edit-wa').value;
+            if(n && a && w) {
+                await updateDoc(doc(db, "orders", id), { customer: n, address: a, wa: w });
+                window.showToast("Data Berhasil Diperbaiki!", "✅");
+                window.closeEditModal();
+            }
+        };
+
         const startListening = () => {
-            // Kita pantau semua order yang belum SELESAI
-            const q = query(collection(db, "orders"), where("status", "!=", "SELESAI"));
-            
-            onSnapshot(q, (snap) => {
+            onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
                 const list = document.getElementById('list-orders');
                 const now = Date.now();
-
                 snap.docChanges().forEach(change => {
                     const data = change.doc.data();
                     const id = change.doc.id;
-                    const createdAt = data.createdAt?.toMillis() || 0;
-
-                    // LOGIKA NOTIFIKASI:
-                    // 1. Harus Driver
-                    // 2. Status SIAP
-                    // 3. Waktu pembuatan tidak lebih lama dari 30 detik (menghindari notif orderan basi)
-                    if (currentUser.role === 'driver' && data.status === "SIAP") {
-                        const isVeryRecent = (now - createdAt) < 30000; 
-                        
-                        if (isVeryRecent && !knownOrders.has(id)) {
-                            triggerNewOrderAlert(data.customer, data.address);
-                            knownOrders.add(id);
-                        }
+                    if (currentUser.role === 'driver' && data.status === "SIAP" && (now - (data.createdAt?.toMillis() || 0)) < 30000 && !knownOrders.has(id)) {
+                        triggerNewOrderAlert(data.customer, data.address); knownOrders.add(id);
                     }
                 });
 
-                if (snap.empty) {
-                    list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">${currentUser.role === 'admin' ? 'NGERUMPI DULU SIS...' : 'SANTAI DULU BRO.. ☕'}</div>`; 
-                    return;
-                }
-
-                // Render List
-                list.innerHTML = "";
-                const sorted = snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0));
+                if (snap.empty) { list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">Kosong Bro..</div>`; return; }
                 
-                sorted.forEach(d => {
+                list.innerHTML = "";
+                snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
                     const item = d.data();
                     const cleanWA = item.wa ? item.wa.replace(/\D/g, '').replace(/^0/, '62') : '';
                     let action = "";
                     
                     if (currentUser.role === 'admin') {
+                        let statusUI = "";
                         if (item.status === 'DAPUR') {
-                            action = `<div class="action-group">
-                                        <button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>
-                                        <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS</button>
-                                      </div>`;
+                            statusUI = `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>`;
                         } else if (item.status === 'SIAP') {
-                            action = `<div class="action-group" style="align-items:center; background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 12px; margin-top: 15px;">
-                                        <div style="flex:2; color:var(--accent-blue); text-align:center; font-weight:800; font-size:10px; letter-spacing:1px;">
-                                            <span class="waiting-icon">⏳</span>TUNGGU DRIVER...
-                                        </div>
-                                        <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">HAPUS</button>
-                                      </div>`;
+                            statusUI = `<div style="flex:2; color:var(--accent-blue); text-align:center; font-weight:800; font-size:10px;"><span class="waiting-icon">⏳</span>TUNGGU DRIVER</div>`;
                         } else {
-                            action = `<div style="color:var(--accent-green);text-align:center;margin:15px 0;font-weight:800;font-size:11px">🛵 ${item.driver} LAGI OTW SIS!</div>`;
+                            statusUI = `<div style="flex:2; color:var(--accent-green);text-align:center;font-weight:800;font-size:11px">🛵 ${item.driver} OTW</div>`;
                         }
+                        
+                        action = `<div class="action-group">
+                                    ${statusUI}
+                                    <button class="edit-btn-small" onclick="window.openEditModal('${d.id}')">✏️</button>
+                                    <button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">🗑️</button>
+                                  </div>`;
                     } else {
-                        if (item.status === 'SIAP') {
-                            action = `<button class="action-btn" style="background:#10b981;color:#000;width:100%;margin-top:15px;" onclick="window.takeOrder('${d.id}')">SIAP! SAYA JEMPUT</button>`;
-                        } else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
+                        if (item.status === 'SIAP') { action = `<button class="action-btn" style="background:#10b981;color:#000;width:100%;margin-top:15px;" onclick="window.takeOrder('${d.id}')">SAYA JEMPUT</button>`; }
+                        else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
                             action = `<div class="action-group">
-                                        <button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SAMPAI TUJUAN!</button>
+                                        <button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SAMPAI!</button>
                                         <button class="danger-btn-small" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL</button>
                                       </div>`;
-                        } else if (item.status === 'DIANTAR') {
-                            action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} LAGI BERJUANG</div>`;
-                        } else {
-                            action = `<div style="text-align:center; color:var(--text-dim); font-size:10px; font-weight:800; margin-top:15px; background:rgba(255,255,255,0.05); padding: 10px; border-radius:10px;">
-                                        <span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK...
-                                      </div>`;
-                        }
+                        } else if (item.status === 'DIANTAR') { action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} OTW</div>`; }
+                        else { action = `<div style="text-align:center; color:var(--text-dim); font-size:10px; font-weight:800; margin-top:15px;"><span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK</div>`; }
                     }
 
                     list.innerHTML += `<div class="order-card">
                         <span class="status-tag">${item.status}</span>
                         <span class="cust-name">${item.customer}</span>
                         <span class="cust-address">📍 ${item.address}</span>
-                        <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg>
-                        </a>
-                        <div style="font-size: 8px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin-top:10px;">Oleh: ${item.adminOnDuty}</div>
+                        <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg></a>
+                        <div style="font-size: 8px; color: var(--text-dim); margin-top:10px;">Dibuat: ${item.adminOnDuty}</div>
                         ${action}
                     </div>`;
                 });
-            }, (error) => {
-                console.error("Snapshot error:", error);
-                // Jika error (misal internet putus), coba restart setelah 5 detik
-                setTimeout(startListening, 5000);
             });
         };
 
         startListening();
 
-        // PAKSA REFRESH SNAPSHOT SAAT TAB DIBUKA KEMBALI
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                window.showToast("Sinkronisasi...", "🔄");
-            }
-        });
-
-        // LEADERBOARD & HISTORY (Standard)
         onSnapshot(collection(db, "driver_stats"), (snap) => {
             const lb = document.getElementById('leaderboard'); lb.innerHTML = "";
             const drivers = []; snap.forEach(d => drivers.push({id: d.id, ...d.data()}));
             drivers.sort((a,b) => (b.points || 0) - (a.points || 0)).forEach((drv, idx) => {
-                lb.innerHTML += `<div class="order-card" style="display:flex;align-items:center;padding:15px">
-                    <div style="font-size:20px;font-weight:900;color:var(--primary);width:35px;opacity:0.5">${idx+1}</div>
-                    <div style="flex:1"><div style="font-weight:800;">${drv.id}</div>
-                        <div style="color:var(--accent-green);font-size:14px;font-weight:900;letter-spacing:1px;margin-top:2px;">🛵 ${drv.totalOrders || 0} SELESAI</div>
-                    </div>
-                    <div style="text-align:right"><div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points || 0}</div>
-                        <div style="font-size:9px;color:var(--text-dim);font-weight:700">SALDO POIN</div>
-                    </div></div>`;
+                lb.innerHTML += `<div class="order-card" style="display:flex;align-items:center;padding:15px"><div style="font-size:20px;font-weight:900;color:var(--primary);width:35px;opacity:0.5">${idx+1}</div><div style="flex:1"><div style="font-weight:800;">${drv.id}</div><div style="color:var(--accent-green);font-size:14px;font-weight:900;">🛵 ${drv.totalOrders || 0} SELESAI</div></div><div style="text-align:right"><div style="color:var(--primary);font-weight:900;font-size:1.1rem">${drv.points || 0}</div><div style="font-size:9px;color:var(--text-dim);">POIN</div></div></div>`;
             });
         });
 
@@ -454,58 +415,34 @@
             histList.innerHTML = ""; let lastDate = "";
             sortedDocs.forEach(d => {
                 const item = d.data();
-                const ts = item.finishedAt || item.createdAt;
-                if (!ts) return;
+                const ts = item.finishedAt || item.createdAt; if (!ts) return;
                 const dateObj = new Date(ts.seconds * 1000);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 if (dateStr !== lastDate) { histList.innerHTML += `<div class="history-date-sep">${dateStr}</div>`; lastDate = dateStr; }
-                histList.innerHTML += `<div class="order-card" style="opacity:0.9; padding: 18px; border-left: 4px solid var(--accent-green);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div style="flex:1">
-                            <span class="status-tag" style="color:var(--accent-green)">SUKSES TERKIRIM</span>
-                            <span class="cust-name" style="font-size:1.1rem; color: #fff;">${item.customer}</span>
-                            <div class="cust-address" style="margin-top: 6px; color: var(--accent-blue); font-size: 0.85rem;">📍 ${item.address}</div>
-                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 24px; height: 24px; background: rgba(37, 211, 102, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🛵</div>
-                                <div style="color:var(--text-main); font-weight:700; font-size:11px;">Kurir: ${item.driver || 'Driver'}</div>
-                            </div>
-                        </div>
-                        <div style="text-align:right;">
-                            <span style="color:var(--primary); font-weight:800; font-size:12px; background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 8px;">
-                                ${dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                    </div>
-                </div>`;
+                histList.innerHTML += `<div class="order-card" style="opacity:0.9; padding: 18px; border-left: 4px solid var(--accent-green);"><span class="status-tag" style="color:var(--accent-green)">SELESAI</span><span class="cust-name">${item.customer}</span><span class="cust-address">📍 ${item.address}</span><div style="margin-top:10px; font-size:11px;">Kurir: ${item.driver}</div></div>`;
             });
         });
 
-        // ACTIONS
         window.handleCreateOrder = async () => {
             const n = document.getElementById('cust-name').value;
             const a = document.getElementById('cust-address').value;
             const w = document.getElementById('cust-wa').value;
             if(n && a && w) {
-                await addDoc(collection(db, "orders"), { 
-                    customer: n, address: a, wa: w, status: "DAPUR", 
-                    adminOnDuty: currentUser.name, createdAt: serverTimestamp() 
-                });
-                window.showToast("Lagi diproses di Dapur..!", "👩‍🍳");
+                await addDoc(collection(db, "orders"), { customer: n, address: a, wa: w, status: "DAPUR", adminOnDuty: currentUser.name, createdAt: serverTimestamp() });
+                window.showToast("Berhasil!", "👩‍🍳");
                 document.getElementById('cust-name').value = ""; document.getElementById('cust-address').value = ""; document.getElementById('cust-wa').value = "";
-            } else { window.showToast("Data jangan dikosongin dong!", "😤"); }
+            } else { window.showToast("Isi data!", "😤"); }
         };
 
         window.updateStatus = async (id, status) => { await updateDoc(doc(db, "orders", id), { status: status }); };
-        window.deleteOrder = async (id) => { if(confirm("Beneran mau dihapus?")) { await deleteDoc(doc(db, "orders", id)); window.showToast("Dihapus!", "🗑️"); } };
-        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); window.showToast("Hati-hati di jalan Bro!", "🛵"); };
-        window.cancelTake = async (id) => { if(confirm("Batal nganter?")) { await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); } };
+        window.deleteOrder = async (id) => { if(confirm("Hapus?")) { await deleteDoc(doc(db, "orders", id)); window.showToast("Terhapus!", "🗑️"); } };
+        window.takeOrder = async (id) => { await updateDoc(doc(db, "orders", id), { status: "DIANTAR", driver: currentUser.name }); };
+        window.cancelTake = async (id) => { if(confirm("Batal?")) { await updateDoc(doc(db, "orders", id), { status: "SIAP", driver: "" }); } };
         window.finishOrder = async (id) => {
             await updateDoc(doc(db, "orders", id), { status: "SELESAI", finishedAt: serverTimestamp() });
             const dr = doc(db, "driver_stats", currentUser.name);
             const ds = await getDoc(dr);
-            if (ds.exists()) { await updateDoc(dr, { points: increment(500), totalOrders: increment(1) }); } 
-            else { await setDoc(dr, { points: 500, totalOrders: 1 }); }
-            window.showToast("Cuan masuk kantong!", "💰");
+            if (ds.exists()) { await updateDoc(dr, { points: increment(500), totalOrders: increment(1) }); } else { await setDoc(dr, { points: 500, totalOrders: 1 }); }
         };
     }
 </script>
