@@ -75,6 +75,11 @@
         .waiting-icon { display: inline-block; animation: rotateWait 2s linear infinite; margin-right: 5px; }
         @keyframes rotateWait { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: var(--text-dim); animation: slideUp 0.8s ease;
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 15px; display: block; filter: grayscale(1); opacity: 0.5; }
+
         .hidden { display: none !important; }
         .login-screen { text-align: center; padding-top: 40px; }
         .role-selector { display: flex; gap: 12px; justify-content: center; margin-bottom: 30px; }
@@ -243,15 +248,10 @@
     let selectedRoleType = '';
     let currentPinInput = '';
     let knownOrders = new Set();
-    
-    // SOUND CONFIG
     const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    notifSound.preload = 'auto';
 
-    // Anti-Sleep Audio Context (Trick)
     window.enableAudioOnFirstClick = () => {
         notifSound.play().then(() => { notifSound.pause(); notifSound.currentTime = 0; }).catch(() => {});
-        console.log("Audio Enabled");
     };
 
     window.showToast = (msg, icon = '✨') => {
@@ -268,19 +268,10 @@
         }, 3000);
     };
 
-    function triggerNewOrderAlert(customer, address) {
-        // Play Sound with retry logic
+    function triggerNewOrderAlert(customer) {
         notifSound.currentTime = 0;
-        const playPromise = notifSound.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => { console.log("Sound blocked by browser"); });
-        }
-
-        // Heavy Vibration Pattern: Getar(500ms)-Diam(200ms)-Getar(500ms)-Diam(200ms)-Getar(800ms)
-        if (navigator.vibrate) {
-            navigator.vibrate([500, 200, 500, 200, 800]);
-        }
-        
+        notifSound.play().catch(() => {});
+        if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 800]);
         window.showToast(`ORDERAN BARU: ${customer}`, "🛵");
     }
 
@@ -294,7 +285,7 @@
     window.handleResetLogin = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
     window.handleClearPin = () => { currentPinInput = ''; document.getElementById('pin-view').innerText = ''; };
     window.handlePressNum = (num) => { 
-        window.enableAudioOnFirstClick(); // Trigger audio on every pin press to keep it alive
+        window.enableAudioOnFirstClick();
         if (currentPinInput.length < 4) { currentPinInput += num; document.getElementById('pin-view').innerText = '*'.repeat(currentPinInput.length); } 
     };
 
@@ -362,18 +353,36 @@
         const startListening = () => {
             onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
                 const list = document.getElementById('list-orders');
-                const now = Date.now();
+                
+                // NOTIFICATION LOGIC
                 snap.docChanges().forEach(change => {
                     const data = change.doc.data();
-                    const id = change.doc.id;
-                    // Driver only: Alert if status becomes SIAP and it's a NEW entry
-                    if (currentUser.role === 'driver' && data.status === "SIAP" && !knownOrders.has(id)) {
-                        triggerNewOrderAlert(data.customer, data.address);
-                        knownOrders.add(id);
+                    if (currentUser.role === 'driver' && data.status === "SIAP" && !knownOrders.has(change.doc.id)) {
+                        triggerNewOrderAlert(data.customer);
+                        knownOrders.add(change.doc.id);
                     }
                 });
 
-                if (snap.empty) { list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">Ngerumpi Dulu Sis...Mumpung Orderan Belum Masuk..</div>`; return; }
+                // EMPTY STATE LOGIC (Pembeda Admin & Driver)
+                if (snap.empty) { 
+                    if (currentUser.role === 'admin') {
+                        list.innerHTML = `
+                            <div class="empty-state">
+                                <span class="empty-icon">🍳</span>
+                                <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">DAPUR STANDBY</div>
+                                <div style="font-size:0.8rem; margin-top:5px;">Belum ada pesanan yang masuk.</div>
+                            </div>`;
+                    } else {
+                        list.innerHTML = `
+                            <div class="empty-state">
+                                <span class="empty-icon">🛵</span>
+                                <div class="waiting-icon" style="font-size:1.5rem; margin-bottom:10px;">⏳</div>
+                                <div style="font-weight:800; font-size:1.1rem; color:var(--accent-green);">SANTAY DULU..</div>
+                                <div style="font-size:0.8rem; margin-top:5px;">Belum ada orderan siap antar.</div>
+                            </div>`;
+                    }
+                    return; 
+                }
                 
                 list.innerHTML = "";
                 snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
@@ -457,4 +466,3 @@
 </script>
 </body>
 </html>
-
