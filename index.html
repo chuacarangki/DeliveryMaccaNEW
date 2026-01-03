@@ -229,11 +229,38 @@
         }, 3000);
     };
 
+    // --- LOGIKA NOTIFIKASI SUARA & VISUAL ---
+    const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+    async function requestNotifPermission() {
+        if ("Notification" in window) {
+            await Notification.requestPermission();
+        }
+    }
+
+    function triggerNewOrderAlert(customer, address) {
+        // Suara
+        notifSound.play().catch(e => console.log("Menunggu interaksi user untuk suara"));
+        
+        // Vibrasi (Android)
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+        // Notifikasi Visual (Jika di background)
+        if (Notification.permission === "granted") {
+            new Notification("ADA ORDERAN SIAP!", {
+                body: `Pelanggan: ${customer} | Lokasi: ${address}`,
+                icon: "https://cdn-icons-png.flaticon.com/512/2830/2830305.png"
+            });
+        }
+    }
+    // ---------------------------------------
+
     window.handleRoleSelection = (role) => { 
         selectedRoleType = role; currentPinInput = '';
         document.getElementById('step-1').classList.add('hidden'); 
         document.getElementById('step-2').classList.remove('hidden'); 
         document.getElementById('role-title').innerText = "PIN " + role;
+        requestNotifPermission(); // Minta izin saat pilih role
     };
 
     window.handleResetLogin = () => { 
@@ -296,11 +323,27 @@
             }, 3000);
         }
 
+        // MONITORING ORDERAN (Dengan Notifikasi Suara)
+        let isInitialLoad = true;
         onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
             const list = document.getElementById('list-orders');
+            
+            // Logika Notifikasi Khusus Driver
+            if (!isInitialLoad && currentUser.role === 'driver') {
+                snap.docChanges().forEach(change => {
+                    if (change.type === "added" || (change.type === "modified" && change.doc.data().status === "SIAP")) {
+                        if (change.doc.data().status === "SIAP") {
+                            triggerNewOrderAlert(change.doc.data().customer, change.doc.data().address);
+                        }
+                    }
+                });
+            }
+            isInitialLoad = false;
+
             if (snap.empty) {
                 list.innerHTML = `<div style="text-align:center;margin-top:50px;color:var(--text-dim);font-weight:700;">${currentUser.role === 'admin' ? 'NGERUMPI DULU SIS...' : 'SANTAI DULU BRO.. ☕'}</div>`; return;
             }
+
             list.innerHTML = "";
             snap.docs.sort((a,b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0)).forEach(d => {
                 const item = d.data();
@@ -439,4 +482,3 @@
 </script>
 </body>
 </html>
-
