@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lesehan Macca | Premium System</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg: #0b0f1a;
             --card-bg: rgba(30, 41, 59, 0.4);
             --primary: #f59e0b;
+            --primary-glow: rgba(245, 158, 11, 0.4);
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --accent-blue: #38bdf8;
@@ -29,6 +31,15 @@
         }
 
         .app-container { width: 100%; max-width: 420px; padding: 20px; }
+
+        /* GLASSMORPHISM EFFECTS */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+        }
 
         /* MODAL STYLE */
         .modal-overlay {
@@ -83,10 +94,13 @@
         .hidden { display: none !important; }
         .login-screen { text-align: center; padding-top: 40px; }
         .role-selector { display: flex; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        
         .btn-role {
             flex: 1; padding: 20px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer;
-            transition: 0.3s; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+            transition: 0.3s; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        .btn-role i { font-size: 1.5rem; }
         .btn-admin { background: var(--primary); color: #000; }
         .btn-driver { background: #10b981; color: #000; }
         
@@ -95,20 +109,23 @@
             border-radius: 16px; padding: 15px; font-size: 1.8rem; letter-spacing: 8px;
             color: var(--primary); font-weight: 800; margin-bottom: 20px; min-height: 65px;
             display: flex; align-items: center; justify-content: center;
+            text-shadow: 0 0 10px var(--primary-glow);
         }
 
         .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-items: center; max-width: 280px; margin: 0 auto; }
         .num-btn { 
             background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white;
             width: 65px; height: 65px; border-radius: 50%; font-size: 1.4rem; font-weight: 800; cursor: pointer;
+            transition: 0.2s;
         }
-        .num-btn:active { background: var(--primary); color: black; }
+        .num-btn:active { background: var(--primary); color: black; transform: scale(0.9); }
 
         .nav-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; background: rgba(255,255,255,0.03); 
             padding: 6px; border-radius: 20px; margin-bottom: 30px; border: 1px solid var(--glass-border);
         }
-        .nav-btn { padding: 14px; border: none; background: none; color: var(--text-dim); font-weight: 800; font-size: 11px; cursor: pointer; }
+        .nav-btn { padding: 14px; border: none; background: none; color: var(--text-dim); font-weight: 800; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-btn i { font-size: 14px; }
         .nav-btn.active { background: var(--primary); color: var(--bg); border-radius: 16px; }
 
         .order-card { 
@@ -122,11 +139,11 @@
         .wa-float {
             position: absolute; top: 15px; right: 15px; width: 45px; height: 45px;
             background: var(--accent-green); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); text-decoration: none; color: white; font-size: 1.2rem;
         }
 
         .action-group { display: flex; gap: 8px; margin-top: 15px; }
-        .action-btn { flex: 2; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .action-btn { flex: 2; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .danger-btn-small { flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; font-size: 10px; }
         .edit-btn-small { background: #64748b; color: white; flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; font-size: 10px; }
 
@@ -134,26 +151,27 @@
         .history-date-sep::after { content: ""; flex: 1; height: 1px; background: rgba(245, 158, 11, 0.2); }
 
         input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; color: white; margin-bottom: 12px; font-size: 1rem; }
+        input:focus { outline: none; border-color: var(--primary); background: rgba(0,0,0,0.4); }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     </style>
 </head>
-<body onclick="enableAudioOnFirstClick()">
+<body onclick="wakeUpSystem()">
 
 <div id="toast-container"></div>
 <div id="greeting-overlay" class="hidden"><div id="greeting-content" class="greet-text"></div></div>
 
 <div id="edit-modal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="color:var(--primary); margin-top:0;">Edit Orderan</h3>
+        <h3 style="color:var(--primary); margin-top:0;"><i class="fas fa-edit"></i> Edit Orderan</h3>
         <input type="hidden" id="edit-id">
         <input type="text" id="edit-name" placeholder="Nama Pelanggan">
         <input type="text" id="edit-address" placeholder="Alamat">
         <input type="text" id="edit-wa" placeholder="WhatsApp">
         <div class="action-group">
-            <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleUpdateOrder()">SIMPAN</button>
-            <button class="danger-btn-small" style="background:var(--accent-red); color:white" onclick="closeEditModal()">BATAL</button>
+            <button class="action-btn" style="background:var(--primary); color:#000" onclick="handleUpdateOrder()"><i class="fas fa-save"></i> SIMPAN</button>
+            <button class="danger-btn-small" style="background:var(--accent-red); color:white" onclick="closeEditModal()"><i class="fas fa-times"></i> BATAL</button>
         </div>
     </div>
 </div>
@@ -167,8 +185,14 @@
 
         <div id="step-1">
             <div class="role-selector">
-                <button class="btn-role btn-admin" onclick="handleRoleSelection('admin')"><span>ADMIN</span><small>DAPUR</small></button>
-                <button class="btn-role btn-driver" onclick="handleRoleSelection('driver')"><span>DRIVER</span><small>PENGANTARAN</small></button>
+                <button class="btn-role btn-admin" onclick="handleRoleSelection('admin')">
+                    <i class="fas fa-utensils"></i>
+                    <span>ADMIN</span><small>DAPUR</small>
+                </button>
+                <button class="btn-role btn-driver" onclick="handleRoleSelection('driver')">
+                    <i class="fas fa-motorcycle"></i>
+                    <span>DRIVER</span><small>PENGANTARAN</small>
+                </button>
             </div>
         </div>
 
@@ -189,20 +213,20 @@
                 <button class="num-btn" onclick="handlePressNum('0')">0</button>
                 <button class="num-btn" style="background:var(--primary); color:black;" onclick="handleLoginSubmit()">OK</button>
             </div>
-            <button onclick="handleResetLogin()" style="background:none; border:none; color:var(--text-dim); margin-top:30px; font-weight:800; cursor:pointer;">KEMBALI KE MENU UTAMA</button>
+            <button onclick="handleResetLogin()" style="background:none; border:none; color:var(--text-dim); margin-top:30px; font-weight:800; cursor:pointer;"><i class="fas fa-arrow-left"></i> KEMBALI</button>
         </div>
     </div>
 
     <div id="main-ui" class="hidden">
         <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div style="background:rgba(255,255,255,0.05); padding:6px 16px; border-radius:50px; border:1px solid var(--primary); color:var(--primary); font-weight:800; font-size:0.75rem;" id="user-display">User</div>
-            <div onclick="handleLogout()" style="color:var(--text-dim); cursor:pointer; font-size:10px; font-weight:800;">LOGOUT</div>
+            <div onclick="handleLogout()" style="color:var(--text-dim); cursor:pointer; font-size:10px; font-weight:800;"><i class="fas fa-sign-out-alt"></i> LOGOUT</div>
         </header>
 
         <nav class="nav-bar">
-            <button id="tab-order" class="nav-btn active" onclick="handleSwitchTab('order')">ORDERS</button>
-            <button id="tab-rank" class="nav-btn" onclick="handleSwitchTab('rank')">RANKING</button>
-            <button id="tab-rekap" class="nav-btn" onclick="handleSwitchTab('rekap')">HISTORY</button>
+            <button id="tab-order" class="nav-btn active" onclick="handleSwitchTab('order')"><i class="fas fa-clipboard-list"></i>ORDERS</button>
+            <button id="tab-rank" class="nav-btn" onclick="handleSwitchTab('rank')"><i class="fas fa-trophy"></i>RANKING</button>
+            <button id="tab-rekap" class="nav-btn" onclick="handleSwitchTab('rekap')"><i class="fas fa-history"></i>HISTORY</button>
         </nav>
 
         <section id="order-section">
@@ -210,7 +234,7 @@
                 <input type="text" id="cust-name" placeholder="Nama Pelanggan">
                 <input type="text" id="cust-address" placeholder="Alamat Pengiriman">
                 <input type="text" id="cust-wa" placeholder="WhatsApp (Contoh: 0812...)">
-                <button class="action-btn" style="background:var(--primary); color:#000; width: 100%;" onclick="handleCreateOrder()">KIRIM KE DAPUR</button>
+                <button class="action-btn" style="background:var(--primary); color:#000; width: 100%;" onclick="handleCreateOrder()"><i class="fas fa-paper-plane"></i> KIRIM KE DAPUR</button>
             </div>
             <div id="list-orders"></div>
         </section>
@@ -238,11 +262,17 @@
 
     enableIndexedDbPersistence(db).catch(() => {});
 
+    // UPDATED USERS_DB with SENDY
     const USERS_DB = {
         '100': { name: 'SUPERADMIN', role: 'admin' },
-        '8': { name: 'MANDA', role: 'admin' }, '9': { name: 'NUNU', role: 'admin' },
-        '3': { name: 'ARA', role: 'admin' }, '4': { name: 'DILLA', role: 'admin' },
-        '11': { name: 'HASBI', role: 'driver' }, '22': { name: 'REZKY', role: 'driver' }, '33': { name: 'ASWAR', role: 'driver' } 
+        '8': { name: 'MANDA', role: 'admin' }, 
+        '9': { name: 'NUNU', role: 'admin' },
+        '3': { name: 'ARA', role: 'admin' }, 
+        '4': { name: 'DILLA', role: 'admin' },
+        '11': { name: 'HASBI', role: 'driver' }, 
+        '22': { name: 'REZKY', role: 'driver' }, 
+        '33': { name: 'ASWAR', role: 'driver' },
+        '66': { name: 'SENDY', role: 'driver' } // Penambahan User Sendy
     };
 
     let selectedRoleType = '';
@@ -250,8 +280,9 @@
     let knownOrders = new Set();
     const notifSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
-    window.enableAudioOnFirstClick = () => {
+    window.wakeUpSystem = () => {
         notifSound.play().then(() => { notifSound.pause(); notifSound.currentTime = 0; }).catch(() => {});
+        if (navigator.vibrate) navigator.vibrate(50);
     };
 
     window.showToast = (msg, icon = '✨') => {
@@ -270,8 +301,8 @@
 
     function triggerNewOrderAlert(customer) {
         notifSound.currentTime = 0;
-        notifSound.play().catch(() => {});
-        if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 800]);
+        notifSound.play().catch(e => { console.log("Sound failed"); });
+        if (navigator.vibrate) { navigator.vibrate([800, 200, 800, 200, 1000]); }
         window.showToast(`ORDERAN BARU: ${customer}`, "🛵");
     }
 
@@ -279,13 +310,14 @@
         selectedRoleType = role; currentPinInput = '';
         document.getElementById('step-1').classList.add('hidden');
         document.getElementById('step-2').classList.remove('hidden');
-        document.getElementById('role-title').innerText = "PIN " + role;
+        document.getElementById('role-title').innerText = "MASUKKAN PIN " + role;
+        window.wakeUpSystem();
     };
 
     window.handleResetLogin = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
     window.handleClearPin = () => { currentPinInput = ''; document.getElementById('pin-view').innerText = ''; };
     window.handlePressNum = (num) => { 
-        window.enableAudioOnFirstClick();
+        window.wakeUpSystem();
         if (currentPinInput.length < 4) { currentPinInput += num; document.getElementById('pin-view').innerText = '*'.repeat(currentPinInput.length); } 
     };
 
@@ -305,6 +337,7 @@
         document.getElementById('rekap-section').classList.toggle('hidden', t!=='rekap');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-' + t).classList.add('active');
+        window.wakeUpSystem();
     };
 
     const currentUser = JSON.parse(localStorage.getItem('macca_user'));
@@ -312,7 +345,7 @@
     if (currentUser) {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-ui').classList.remove('hidden');
-        document.getElementById('user-display').innerText = currentUser.name;
+        document.getElementById('user-display').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}`;
         if (currentUser.role === 'admin') document.getElementById('admin-only-form').classList.remove('hidden');
 
         if (localStorage.getItem('just_logged_in')) {
@@ -320,7 +353,7 @@
             const content = document.getElementById('greeting-content');
             overlay.classList.remove('hidden');
             if(currentUser.name === 'SUPERADMIN') { content.innerHTML = `Selamat Datang<br><span style="color:#fff; font-size:2.8rem;">BOSS BESAR! 👑</span>`; } 
-            else { content.innerHTML = currentUser.role === 'admin' ? `Assalamualaikum<br><span style="color:#fff; font-size:2.8rem;">Gadis-Gadis..!!!</span>` : `Selamat Bekerja<br><span style="color:#fff; font-size:2.8rem;">Bro..!!! 🛵</span>`; }
+            else { content.innerHTML = currentUser.role === 'admin' ? `Assalamualaikum<br><span style="color:#fff; font-size:2.8rem;">Gadis-Gadis..!!!</span>` : `Selamat Bekerja<br><span style="color:#fff; font-size:2.8rem;">${currentUser.name}..!!! 🛵</span>`; }
             setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 1000); localStorage.removeItem('just_logged_in'); }, 3000);
         }
 
@@ -353,8 +386,6 @@
         const startListening = () => {
             onSnapshot(query(collection(db, "orders"), where("status", "!=", "SELESAI")), (snap) => {
                 const list = document.getElementById('list-orders');
-                
-                // NOTIFICATION LOGIC
                 snap.docChanges().forEach(change => {
                     const data = change.doc.data();
                     if (currentUser.role === 'driver' && data.status === "SIAP" && !knownOrders.has(change.doc.id)) {
@@ -363,23 +394,11 @@
                     }
                 });
 
-                // EMPTY STATE LOGIC (Pembeda Admin & Driver)
                 if (snap.empty) { 
                     if (currentUser.role === 'admin') {
-                        list.innerHTML = `
-                            <div class="empty-state">
-                                <span class="empty-icon">🍳</span>
-                                <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">DAPUR STANDBY</div>
-                                <div style="font-size:0.8rem; margin-top:5px;">Belum ada pesanan yang masuk.</div>
-                            </div>`;
+                        list.innerHTML = `<div class="empty-state"><span class="empty-icon">🍳</span><div style="font-weight:800; font-size:1.1rem; color:var(--primary);">DAPUR STANDBY</div><div style="font-size:0.8rem; margin-top:5px;">Belum ada pesanan yang masuk.</div></div>`;
                     } else {
-                        list.innerHTML = `
-                            <div class="empty-state">
-                                <span class="empty-icon">🛵</span>
-                                <div class="waiting-icon" style="font-size:1.5rem; margin-bottom:10px;">⏳</div>
-                                <div style="font-weight:800; font-size:1.1rem; color:var(--accent-green);">SANTAY DULU..</div>
-                                <div style="font-size:0.8rem; margin-top:5px;">Belum ada orderan siap antar.</div>
-                            </div>`;
+                        list.innerHTML = `<div class="empty-state"><span class="empty-icon">🛵</span><div class="waiting-icon" style="font-size:1.5rem; margin-bottom:10px;">⏳</div><div style="font-weight:800; font-size:1.1rem; color:var(--accent-green);">SANTAY DULU..</div><div style="font-size:0.8rem; margin-top:5px;">Belum ada orderan siap antar.</div></div>`;
                     }
                     return; 
                 }
@@ -391,24 +410,24 @@
                     let action = "";
                     
                     if (currentUser.role === 'admin') {
-                        let statusUI = (item.status === 'DAPUR') ? `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')">SIAP DIANTAR</button>` :
+                        let statusUI = (item.status === 'DAPUR') ? `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')"><i class="fas fa-check-circle"></i> SIAP DIANTAR</button>` :
                                        (item.status === 'SIAP') ? `<div style="flex:2; color:var(--accent-blue); text-align:center; font-weight:800; font-size:10px;"><span class="waiting-icon">⏳</span>TUNGGU DRIVER</div>` :
-                                       `<div style="flex:2; color:var(--accent-green);text-align:center;font-weight:800;font-size:11px">🛵 ${item.driver} OTW</div>`;
-                        action = `<div class="action-group">${statusUI}<button class="edit-btn-small" onclick="window.openEditModal('${d.id}')">✏️</button><button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')">🗑️</button></div>`;
+                                       `<div style="flex:2; color:var(--accent-green);text-align:center;font-weight:800;font-size:11px"><i class="fas fa-motorcycle"></i> ${item.driver} OTW</div>`;
+                        action = `<div class="action-group">${statusUI}<button class="edit-btn-small" onclick="window.openEditModal('${d.id}')"><i class="fas fa-pen"></i></button><button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')"><i class="fas fa-trash"></i></button></div>`;
                     } else {
-                        if (item.status === 'SIAP') { action = `<button class="action-btn" style="background:#10b981;color:#000;width:100%;margin-top:15px;" onclick="window.takeOrder('${d.id}')">SAYA JEMPUT</button>`; }
+                        if (item.status === 'SIAP') { action = `<button class="action-btn" style="background:#10b981;color:#000;width:100%;margin-top:15px;" onclick="window.takeOrder('${d.id}')"><i class="fas fa-hand-holding-heart"></i> SAYA JEMPUT</button>`; }
                         else if (item.status === 'DIANTAR' && item.driver === currentUser.name) {
-                            action = `<div class="action-group"><button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')">SAMPAI!</button><button class="danger-btn-small" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL</button></div>`;
-                        } else if (item.status === 'DIANTAR') { action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px">🛵 ${item.driver} OTW</div>`; }
+                            action = `<div class="action-group"><button class="action-btn" style="background:var(--primary);color:#000" onclick="window.finishOrder('${d.id}')"><i class="fas fa-flag-checkered"></i> SAMPAI!</button><button class="danger-btn-small" style="background:var(--danger-dark); color:#ef4444; border: 1px solid #ef4444;" onclick="window.cancelTake('${d.id}')">BATAL</button></div>`;
+                        } else if (item.status === 'DIANTAR') { action = `<div style="color:var(--accent-green);text-align:center;margin-top:15px;font-weight:800;font-size:11px"><i class="fas fa-shipping-fast"></i> ${item.driver} OTW</div>`; }
                         else { action = `<div style="text-align:center; color:var(--text-dim); font-size:10px; font-weight:800; margin-top:15px;"><span class="waiting-icon">👩‍🍳</span> LAGI DIMASAK</div>`; }
                     }
 
                     list.innerHTML += `<div class="order-card">
                         <span class="status-tag">${item.status}</span>
                         <span class="cust-name">${item.customer}</span>
-                        <span class="cust-address">📍 ${item.address}</span>
-                        <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12.031 6.172c-2.32 0-4.591 1.342-4.591 4.225 0 1.002.392 1.777.896 2.454l-1.025 2.158 2.223-.748c.636.353 1.353.567 2.112.567 2.721 0 4.809-1.921 4.809-4.432 0-2.457-1.996-4.224-4.524-4.224zm0-1.172c3.21 0 5.696 2.379 5.696 5.396 0 3.125-2.618 5.604-5.811 5.604-.882 0-1.716-.192-2.464-.533l-3.452 1.163 1.597-3.36c-.636-.856-1.007-1.921-1.007-3.094.001-3.149 2.508-5.176 5.441-5.176zm8.115 11.232c-.392 1.254-2.146 2.115-3.232 2.193-1.086.078-2.215-.246-4.636-1.215-3.344-1.344-5.462-4.739-5.636-4.97-.174-.23-.974-1.284-.974-2.45 0-1.166.608-1.738.826-1.972.218-.234.478-.292.637-.292.159 0 .319.001.458.007.146.007.342-.055.536.411.194.466.666 1.623.724 1.739.058.116.097.252.02.406-.078.154-.117.251-.232.385-.116.134-.244.298-.348.4-.116.116-.237.242-.102.473.134.23.595.981 1.282 1.594.883.787 1.626 1.03 1.861 1.146.235.116.372.097.51-.058.138-.155.592-.687.749-.92.158-.233.316-.194.534-.116.218.078 1.383.652 1.621.77.237.117.396.175.454.272.058.097.058.563-.153 1.188z"/></svg></a>
-                        <div style="font-size: 8px; color: var(--text-dim); margin-top:10px;">Dibuat: ${item.adminOnDuty}</div>
+                        <span class="cust-address"><i class="fas fa-map-marker-alt"></i> ${item.address}</span>
+                        <a href="https://wa.me/${cleanWA}" target="_blank" class="wa-float"><i class="fab fa-whatsapp"></i></a>
+                        <div style="font-size: 8px; color: var(--text-dim); margin-top:10px;">Admin: ${item.adminOnDuty}</div>
                         ${action}
                     </div>`;
                 });
@@ -437,7 +456,7 @@
                 const dateObj = new Date(ts.seconds * 1000);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 if (dateStr !== lastDate) { histList.innerHTML += `<div class="history-date-sep">${dateStr}</div>`; lastDate = dateStr; }
-                histList.innerHTML += `<div class="order-card" style="opacity:0.9; padding: 18px; border-left: 4px solid var(--accent-green);"><span class="status-tag" style="color:var(--accent-green)">SELESAI</span><span class="cust-name">${item.customer}</span><span class="cust-address">📍 ${item.address}</span><div style="margin-top:10px; font-size:11px;">Kurir: ${item.driver}</div></div>`;
+                histList.innerHTML += `<div class="order-card" style="opacity:0.9; padding: 18px; border-left: 4px solid var(--accent-green);"><span class="status-tag" style="color:var(--accent-green)">SELESAI</span><span class="cust-name">${item.customer}</span><span class="cust-address">📍 ${item.address}</span><div style="margin-top:10px; font-size:11px;"><i class="fas fa-user-check"></i> Kurir: ${item.driver}</div></div>`;
             });
         });
 
