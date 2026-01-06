@@ -418,7 +418,7 @@
                 
                 if (currentUser.role === 'admin') {
                     let statusUI = (item.status === 'DAPUR') ? `<button class="action-btn" style="background:var(--accent-blue);color:#000" onclick="window.updateStatus('${d.id}', 'SIAP')"><i class="fas fa-check-circle"></i> SIAP</button>` :
-                                   (item.status === 'SIAP') ? `<div style="flex:2; color:var(--accent-blue); text-align:center; font-size:10px; font-weight:800;"><span class="waiting-icon">⏳</span> DRIVER?</div>` :
+                                   (item.status === 'SIAP') ? `<div style="flex:2; color:var(--accent-blue); text-align:center; font-size:10px; font-weight:800;"><span class="waiting-icon">⏳</span> DRIVER..KAMU LAGI DIMANA BEB?</div>` :
                                    `<div style="flex:2; color:var(--accent-green); text-align:center; font-size:10px; font-weight:800;"><i class="fas fa-motorcycle motor-run"></i> DI GASS KAN OLEH ${item.driver}</div>`;
                     action = `<div class="action-group">${statusUI}<button class="edit-btn-small" onclick="window.openEditModal('${d.id}')"><i class="fas fa-pen"></i></button><button class="danger-btn-small" style="background:var(--accent-red); color:white;" onclick="window.deleteOrder('${d.id}')"><i class="fas fa-trash"></i></button></div>`;
                 } else {
@@ -505,3 +505,4 @@
 </script>
 </body>
 </html>
+
